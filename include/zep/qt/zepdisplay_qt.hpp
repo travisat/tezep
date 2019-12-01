@@ -6,9 +6,9 @@
 #include <windows.h>
 #endif
 
-#include "zep/qt/common_qt.h"
-#include "zep/display.h"
-#include "zep/syntax.h"
+#include "zep/qt/common_qt.hpp"
+#include "zep/display.hpp"
+#include "zep/syntax.hpp"
 #include <string>
 
 namespace Zep

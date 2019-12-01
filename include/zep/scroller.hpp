@@ -1,8 +1,8 @@
 #pragma once
 
-#include "splits.h"
-#include "editor.h"
-#include "zep/mcommon/animation/timer.h"
+#include "zep/editor.hpp"
+#include "zep/mcommon/animation/timer.hpp"
+#include "zep/splits.hpp"
 
 namespace Zep
 {
@@ -15,12 +15,12 @@ public:
     Scroller(ZepEditor& editor, Region& parent);
 
     virtual void Display(ZepTheme& theme);
-    virtual void Notify(std::shared_ptr<ZepMessage> message) override;
+    void Notify(std::shared_ptr<ZepMessage> message) override;
 
-    float vScrollVisiblePercent = 1.0f;
-    float vScrollPosition = 0.0f;
-    float vScrollLinePercent = 0.0f;
-    float vScrollPagePercent = 0.0f;
+    float vScrollVisiblePercent = 1.0F;
+    float vScrollPosition = 0.0F;
+    float vScrollLinePercent = 0.0F;
+    float vScrollPagePercent = 0.0F;
     bool vertical = true;
 
 private:
@@ -31,9 +31,9 @@ private:
     void PageDown();
     void DoMove(NVec2f pos);
 
-    float ThumbSize() const;
-    float ThumbExtra() const;
-    NRectf ThumbRect() const;
+    [[nodiscard]] auto ThumbSize() const -> float;
+    [[nodiscard]] auto ThumbExtra() const -> float;
+    [[nodiscard]] auto ThumbRect() const -> NRectf;
 
 private:
     std::shared_ptr<Region> m_region;
@@ -53,7 +53,7 @@ private:
     };
     ScrollState m_scrollState = ScrollState::None;
     NVec2f m_mouseDownPos;
-    float m_mouseDownPercent;
+    float m_mouseDownPercent{};
 };
 
 }; // namespace Zep

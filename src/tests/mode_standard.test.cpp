@@ -1,12 +1,11 @@
-#include "config_app.h"
-#include "zep/mcommon/logger.h"
+#include "zep/mcommon/logger.hpp"
 
-#include "zep/buffer.h"
-#include "zep/display.h"
-#include "zep/editor.h"
-#include "zep/mode_standard.h"
-#include "zep/tab_window.h"
-#include "zep/window.h"
+#include "zep/buffer.hpp"
+#include "zep/display.hpp"
+#include "zep/editor.hpp"
+#include "zep/mode_standard.hpp"
+#include "zep/tab_window.hpp"
+#include "zep/window.hpp"
 
 #include <gtest/gtest.h>
 

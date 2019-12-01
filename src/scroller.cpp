@@ -1,9 +1,9 @@
-#include "zep/editor.h"
-#include "zep/theme.h"
-#include "zep/display.h"
-#include "zep/scroller.h"
+#include "zep/scroller.hpp"
+#include "zep/display.hpp"
+#include "zep/editor.hpp"
+#include "zep/theme.hpp"
 
-#include "zep/mcommon/logger.h"
+#include "zep/mcommon/logger.hpp"
 
 // A scrollbar that is manually drawn and implemented.  This means it is independent of the backend and can be drawn the
 // same in Qt and ImGui
@@ -25,14 +25,14 @@ Scroller::Scroller(ZepEditor& editor, Region& parent)
 
     m_region->vertical = false;
 
-    const float scrollButtonMargin = 3.0f * editor.GetPixelScale();
+    const float scrollButtonMargin = 3.0F * editor.GetPixelScale();
     m_topButtonRegion->margin = NVec2f(scrollButtonMargin, scrollButtonMargin);
     m_bottomButtonRegion->margin = NVec2f(scrollButtonMargin, scrollButtonMargin);
-    m_mainRegion->margin = NVec2f(scrollButtonMargin, 0.0f);
+    m_mainRegion->margin = NVec2f(scrollButtonMargin, 0.0F);
 
-    const float scrollButtonSize = 16.0f * editor.GetPixelScale();
-    m_topButtonRegion->fixed_size = NVec2f(0.0f, scrollButtonSize);
-    m_bottomButtonRegion->fixed_size = NVec2f(0.0f, scrollButtonSize);
+    const float scrollButtonSize = 16.0F * editor.GetPixelScale();
+    m_topButtonRegion->fixed_size = NVec2f(0.0F, scrollButtonSize);
+    m_bottomButtonRegion->fixed_size = NVec2f(0.0F, scrollButtonSize);
 
     m_region->children.push_back(m_topButtonRegion);
     m_region->children.push_back(m_mainRegion);
@@ -48,28 +48,28 @@ void Scroller::CheckState()
         return;
     }
 
-    if (timer_get_elapsed_seconds(m_start_delay_timer) < 0.5f)
+    if (timer_get_elapsed_seconds(m_start_delay_timer) < 0.5F)
     {
         return;
     }
 
     switch (m_scrollState)
     {
-        default:
-        case ScrollState::None:
-            break;
-        case ScrollState::ScrollUp:
-            ClickUp();
-            break;
-        case ScrollState::ScrollDown:
-            ClickDown();
-            break;
-        case ScrollState::PageUp:
-            PageUp();
-            break;
-        case ScrollState::PageDown:
-            PageDown();
-            break;
+    default:
+    case ScrollState::None:
+        break;
+    case ScrollState::ScrollUp:
+        ClickUp();
+        break;
+    case ScrollState::ScrollDown:
+        ClickDown();
+        break;
+    case ScrollState::PageUp:
+        PageUp();
+        break;
+    case ScrollState::PageDown:
+        PageDown();
+        break;
     }
 
     GetEditor().RequestRefresh();
@@ -78,7 +78,7 @@ void Scroller::CheckState()
 void Scroller::ClickUp()
 {
     vScrollPosition -= vScrollLinePercent;
-    vScrollPosition = std::max(0.0f, vScrollPosition);
+    vScrollPosition = std::max(0.0F, vScrollPosition);
     GetEditor().Broadcast(std::make_shared<ZepMessage>(Msg::ComponentChanged, this));
     m_scrollState = ScrollState::ScrollUp;
 }
@@ -86,7 +86,7 @@ void Scroller::ClickUp()
 void Scroller::ClickDown()
 {
     vScrollPosition += vScrollLinePercent;
-    vScrollPosition = std::min(1.0f - vScrollVisiblePercent, vScrollPosition);
+    vScrollPosition = std::min(1.0F - vScrollVisiblePercent, vScrollPosition);
     GetEditor().Broadcast(std::make_shared<ZepMessage>(Msg::ComponentChanged, this));
     m_scrollState = ScrollState::ScrollDown;
 }
@@ -94,7 +94,7 @@ void Scroller::ClickDown()
 void Scroller::PageUp()
 {
     vScrollPosition -= vScrollPagePercent;
-    vScrollPosition = std::max(0.0f, vScrollPosition);
+    vScrollPosition = std::max(0.0F, vScrollPosition);
     GetEditor().Broadcast(std::make_shared<ZepMessage>(Msg::ComponentChanged, this));
     m_scrollState = ScrollState::PageUp;
 }
@@ -102,7 +102,7 @@ void Scroller::PageUp()
 void Scroller::PageDown()
 {
     vScrollPosition += vScrollPagePercent;
-    vScrollPosition = std::min(1.0f - vScrollVisiblePercent, vScrollPosition);
+    vScrollPosition = std::min(1.0F - vScrollVisiblePercent, vScrollPosition);
     GetEditor().Broadcast(std::make_shared<ZepMessage>(Msg::ComponentChanged, this));
     m_scrollState = ScrollState::PageDown;
 }
@@ -114,25 +114,25 @@ void Scroller::DoMove(NVec2f pos)
         float dist = pos.y - m_mouseDownPos.y;
 
         float totalMove = m_mainRegion->rect.Height() - ThumbSize();
-        float percentPerPixel = (1.0f - vScrollVisiblePercent) / totalMove;
+        float percentPerPixel = (1.0F - vScrollVisiblePercent) / totalMove;
         vScrollPosition = m_mouseDownPercent + (percentPerPixel * dist);
-        vScrollPosition = std::min(1.0f - vScrollVisiblePercent, vScrollPosition);
-        vScrollPosition = std::max(0.0f, vScrollPosition);
+        vScrollPosition = std::min(1.0F - vScrollVisiblePercent, vScrollPosition);
+        vScrollPosition = std::max(0.0F, vScrollPosition);
         GetEditor().Broadcast(std::make_shared<ZepMessage>(Msg::ComponentChanged, this));
     }
 }
 
-float Scroller::ThumbSize() const
+auto Scroller::ThumbSize() const -> float
 {
-    return std::max(10.0f, m_mainRegion->rect.Height() * vScrollVisiblePercent);
+    return std::max(10.0F, m_mainRegion->rect.Height() * vScrollVisiblePercent);
 }
 
-float Scroller::ThumbExtra() const
+auto Scroller::ThumbExtra() const -> float
 {
-    return std::max(0.0f, ThumbSize() - (m_mainRegion->rect.Height() * vScrollVisiblePercent));
+    return std::max(0.0F, ThumbSize() - (m_mainRegion->rect.Height() * vScrollVisiblePercent));
 }
 
-NRectf Scroller::ThumbRect() const
+auto Scroller::ThumbRect() const -> NRectf
 {
     auto thumbSize = ThumbSize();
     return NRectf(NVec2f(m_mainRegion->rect.topLeftPx.x, m_mainRegion->rect.topLeftPx.y + m_mainRegion->rect.Height() * vScrollPosition), NVec2f(m_mainRegion->rect.bottomRightPx.x, m_mainRegion->rect.topLeftPx.y + m_mainRegion->rect.Height() * vScrollPosition + thumbSize));
@@ -142,62 +142,60 @@ void Scroller::Notify(std::shared_ptr<ZepMessage> message)
 {
     switch (message->messageId)
     {
-        case Msg::Tick:
-        {
-            CheckState();
-        }
-        break;
+    case Msg::Tick: {
+        CheckState();
+    }
+    break;
 
-        case Msg::MouseDown:
-            if (message->button == ZepMouseButton::Left)
+    case Msg::MouseDown:
+        if (message->button == ZepMouseButton::Left)
+        {
+            if (m_bottomButtonRegion->rect.Contains(message->pos))
             {
-                if (m_bottomButtonRegion->rect.Contains(message->pos))
+                ClickDown();
+                timer_start(m_start_delay_timer);
+                message->handled = true;
+            }
+            else if (m_topButtonRegion->rect.Contains(message->pos))
+            {
+                ClickUp();
+                timer_start(m_start_delay_timer);
+                message->handled = true;
+            }
+            else if (m_mainRegion->rect.Contains(message->pos))
+            {
+                auto thumbRect = ThumbRect();
+                if (thumbRect.Contains(message->pos))
                 {
-                    ClickDown();
+                    m_mouseDownPos = message->pos;
+                    m_mouseDownPercent = vScrollPosition;
+                    m_scrollState = ScrollState::Drag;
+                    message->handled = true;
+                }
+                else if (message->pos.y > thumbRect.BottomLeft().y)
+                {
+                    PageDown();
                     timer_start(m_start_delay_timer);
                     message->handled = true;
                 }
-                else if (m_topButtonRegion->rect.Contains(message->pos))
+                else if (message->pos.y < thumbRect.TopRight().y)
                 {
-                    ClickUp();
+                    PageUp();
                     timer_start(m_start_delay_timer);
                     message->handled = true;
-                }
-                else if (m_mainRegion->rect.Contains(message->pos))
-                {
-                    auto thumbRect = ThumbRect();
-                    if (thumbRect.Contains(message->pos))
-                    {
-                        m_mouseDownPos = message->pos;
-                        m_mouseDownPercent = vScrollPosition;
-                        m_scrollState = ScrollState::Drag;
-                        message->handled = true;
-                    }
-                    else if (message->pos.y > thumbRect.BottomLeft().y)
-                    {
-                        PageDown();
-                        timer_start(m_start_delay_timer);
-                        message->handled = true;
-                    }
-                    else if (message->pos.y < thumbRect.TopRight().y)
-                    {
-                        PageUp();
-                        timer_start(m_start_delay_timer);
-                        message->handled = true;
-                    }
                 }
             }
-            break;
-        case Msg::MouseUp:
-        {
-            m_scrollState = ScrollState::None;
         }
         break;
-        case Msg::MouseMove:
-            DoMove(message->pos);
-            break;
-        default:
-            break;
+    case Msg::MouseUp: {
+        m_scrollState = ScrollState::None;
+    }
+    break;
+    case Msg::MouseMove:
+        DoMove(message->pos);
+        break;
+    default:
+        break;
     }
 }
 

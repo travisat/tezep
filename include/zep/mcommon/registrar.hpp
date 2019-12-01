@@ -1,19 +1,22 @@
 #pragma once
 
-#include <unordered_map>
-#include <typeinfo>
+#include <functional>
+#include <memory>
 #include <typeindex>
+#include <typeinfo>
+#include <unordered_map>
+
 
 namespace Mgfx
 {
-template<class T>
+template <class T>
 class Registrar
 {
 public:
     using Collection = std::unordered_map<std::type_index, std::shared_ptr<T>>;
 
     template <class T>
-    T* Get()
+    auto Get() -> T*
     {
         return dynamic_cast<T*>(items[typeid(T)].get());
     };
@@ -37,7 +40,7 @@ public:
         }
     }
 
-    const Collection& Getitems() const
+    auto Getitems() const -> const Collection&
     {
         return items;
     }
@@ -46,4 +49,4 @@ private:
     Collection items;
 };
 
-} // Mgfx
+} // namespace Mgfx

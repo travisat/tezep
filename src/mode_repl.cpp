@@ -1,11 +1,11 @@
-#include "zep/mode_repl.h"
-#include "zep/filesystem.h"
-#include "zep/tab_window.h"
-#include "zep/window.h"
-#include "zep/editor.h"
+#include "zep/mode_repl.hpp"
+#include "zep/editor.hpp"
+#include "zep/filesystem.hpp"
+#include "zep/tab_window.hpp"
+#include "zep/window.hpp"
 
-#include "zep/mcommon/logger.h"
-#include "zep/mcommon/threadutils.h"
+#include "zep/mcommon/logger.hpp"
+#include "zep/mcommon/threadutils.hpp"
 
 namespace Zep
 {
@@ -14,16 +14,14 @@ const std::string PromptString = ">> ";
 const std::string ContinuationString = ".. ";
 
 ZepMode_Repl::ZepMode_Repl(ZepEditor& editor, ZepWindow& launchWindow, ZepWindow& replWindow)
-    : ZepMode(editor),
-    m_launchWindow(launchWindow),
-    m_replWindow(replWindow)
+    : ZepMode(editor)
+    , m_launchWindow(launchWindow)
+    , m_replWindow(replWindow)
 {
     m_pRepl = m_launchWindow.GetBuffer().GetReplProvider();
 }
 
-ZepMode_Repl::~ZepMode_Repl()
-{
-}
+ZepMode_Repl::~ZepMode_Repl() = default;
 
 void ZepMode_Repl::Close()
 {
@@ -56,7 +54,7 @@ void ZepMode_Repl::AddKeyPress(uint32_t key, uint32_t modifiers)
         }
         return;
     }
-  
+
     // Set the cursor to the end of the buffer while inserting text
     m_replWindow.SetBufferCursor(MaxCursorMove);
     m_replWindow.SetCursorType(CursorType::Insert);
@@ -69,21 +67,22 @@ void ZepMode_Repl::AddKeyPress(uint32_t key, uint32_t modifiers)
         GetEditor().GetGlobalMode()->SetEditorMode(EditorMode::Normal);
         m_currentMode = Zep::EditorMode::Normal;
         return;
-    } 
-    else if (key == ExtKeys::RETURN)
+    }
+    if (key == ExtKeys::RETURN)
     {
         auto& buffer = m_replWindow.GetBuffer();
         std::string str = std::string(buffer.GetText().begin() + m_startLocation, buffer.GetText().end());
         buffer.Insert(buffer.EndLocation(), "\n");
 
-        auto stripLineStarts = [](std::string& str)
-        {
+        auto stripLineStarts = [](std::string& str) {
             bool newline = true;
             int pos = 0;
             while (pos < str.size())
             {
                 if (str[pos] == '\n')
+                {
                     newline = true;
+                }
                 else if (newline)
                 {
                     if (str.find(PromptString, pos) == pos)
@@ -91,7 +90,7 @@ void ZepMode_Repl::AddKeyPress(uint32_t key, uint32_t modifiers)
                         str.erase(pos, PromptString.length());
                         continue;
                     }
-                    else if (str.find(ContinuationString, pos) == pos)
+                    if (str.find(ContinuationString, pos) == pos)
                     {
                         str.erase(pos, ContinuationString.length());
                         continue;
@@ -104,13 +103,13 @@ void ZepMode_Repl::AddKeyPress(uint32_t key, uint32_t modifiers)
         stripLineStarts(str);
 
         std::string ret;
-        if (m_pRepl)
+        if (m_pRepl != nullptr)
         {
             int indent = 0;
             bool complete = m_pRepl->fnIsFormComplete ? m_pRepl->fnIsFormComplete(str, indent) : true;
             if (!complete)
             {
-                // If the indent is < 0, we completed too much of the expression, so don't let the user hit return until they 
+                // If the indent is < 0, we completed too much of the expression, so don't let the user hit return until they
                 // fix it.  Example in lisp: (+ 2 2))  This expression has 'too many' close brackets.
                 if (indent < 0)
                 {
@@ -118,7 +117,7 @@ void ZepMode_Repl::AddKeyPress(uint32_t key, uint32_t modifiers)
                     m_replWindow.SetBufferCursor(MaxCursorMove);
                     return;
                 }
-                   
+
                 // New line continuation symbol
                 buffer.Insert(buffer.EndLocation(), ContinuationString);
 
@@ -149,7 +148,7 @@ void ZepMode_Repl::AddKeyPress(uint32_t key, uint32_t modifiers)
         BeginInput();
         return;
     }
-    else if (key == ExtKeys::BACKSPACE)
+    if (key == ExtKeys::BACKSPACE)
     {
         auto cursor = m_replWindow.GetBufferCursor() - 1;
         if (cursor >= m_startLocation)
@@ -188,7 +187,7 @@ void ZepMode_Repl::Begin()
     m_replWindow.SetCursorType(CursorType::Insert);
 
     GetEditor().SetCommandText("");
-    
+
     BeginInput();
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "mode.h"
+#include "zep/mode.hpp"
+
 #include <future>
 #include <memory>
 #include <regex>
@@ -14,17 +15,17 @@ class ZepMode_Repl : public ZepMode
 {
 public:
     ZepMode_Repl(ZepEditor& editor, ZepWindow& launchWindow, ZepWindow& replWindow);
-    ~ZepMode_Repl();
+    ~ZepMode_Repl() override;
 
-    virtual void AddKeyPress(uint32_t key, uint32_t modifiers = 0) override;
-    virtual void Begin() override;
-    virtual void Notify(std::shared_ptr<ZepMessage> message) override;
-    
-    static const char* StaticName()
+    void AddKeyPress(uint32_t key, uint32_t modifiers) override;
+    void Begin() override;
+    void Notify(std::shared_ptr<ZepMessage> message) override;
+
+    static auto StaticName() -> const char*
     {
         return "REPL";
     }
-    virtual const char* Name() const override
+    [[nodiscard]] auto Name() const -> const char* override
     {
         return StaticName();
     }

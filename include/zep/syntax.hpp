@@ -1,6 +1,6 @@
 #pragma once
 
-#include "buffer.h"
+#include "zep/buffer.hpp"
 
 #include <atomic>
 #include <future>
@@ -27,7 +27,7 @@ enum
 {
     CaseInsensitive = (1 << 0)
 };
-};
+} // namespace ZepSyntaxFlags
 
 struct SyntaxData
 {
@@ -40,26 +40,26 @@ class ZepSyntaxAdorn;
 class ZepSyntax : public ZepComponent
 {
 public:
-    ZepSyntax(ZepBuffer& buffer,
+    explicit ZepSyntax(ZepBuffer& buffer,
         const std::set<std::string>& keywords = std::set<std::string>{},
         const std::set<std::string>& identifiers = std::set<std::string>{},
         uint32_t flags = 0);
-    virtual ~ZepSyntax();
+    ~ZepSyntax() override;
 
-    virtual SyntaxData GetSyntaxAt(long index) const;
+    virtual auto GetSyntaxAt(int32_t index) const -> SyntaxData;
     virtual void UpdateSyntax();
     virtual void Interrupt();
     virtual void Wait() const;
 
-    virtual long GetProcessedChar() const
+    virtual auto GetProcessedChar() const -> int32_t
     {
         return m_processedChar;
     }
-    virtual const std::vector<SyntaxData>& GetText() const
+    virtual auto GetText() const -> const std::vector<SyntaxData>&
     {
         return m_syntax;
     }
-    virtual void Notify(std::shared_ptr<ZepMessage> payload) override;
+    void Notify(std::shared_ptr<ZepMessage> payload) override;
 
 private:
     virtual void QueueUpdateSyntax(BufferLocation startLocation, BufferLocation endLocation);
@@ -69,8 +69,8 @@ protected:
     std::vector<CommentEntry> m_commentEntries;
     std::vector<SyntaxData> m_syntax;
     std::future<void> m_syntaxResult;
-    std::atomic<long> m_processedChar = { 0 };
-    std::atomic<long> m_targetChar = { 0 };
+    std::atomic<int32_t> m_targetChar = { 0 };
+    std::atomic<int32_t> m_processedChar = { 0 };
     std::vector<uint32_t> m_multiCommentStarts;
     std::vector<uint32_t> m_multiCommentEnds;
     std::set<std::string> m_keywords;
@@ -90,7 +90,7 @@ public:
     {
     }
 
-    virtual SyntaxData GetSyntaxAt(long offset, bool& found) const = 0;
+    virtual auto GetSyntaxAt(int32_t offset, bool& found) const -> SyntaxData = 0;
 
 protected:
     ZepBuffer& m_buffer;

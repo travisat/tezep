@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mode.h"
+#include "zep/mode.hpp"
 
 namespace Zep
 {
@@ -8,23 +8,23 @@ namespace Zep
 class ZepMode_Standard : public ZepMode
 {
 public:
-    ZepMode_Standard(ZepEditor& editor);
-    ~ZepMode_Standard();
+    explicit ZepMode_Standard(ZepEditor& editor);
+    ~ZepMode_Standard() override;
 
-    virtual void AddKeyPress(uint32_t key, uint32_t modifiers = 0) override;
-    virtual void Begin() override;
+    void AddKeyPress(uint32_t key, uint32_t modifiers) override;
+    void Begin() override;
 
-    static const char* StaticName()
+    static auto StaticName() -> const char*
     {
         return "Standard";
     }
-    virtual const char* Name() const override
+    [[nodiscard]] auto Name() const -> const char* override
     {
         return StaticName();
     }
 
 private:
-    virtual bool SwitchMode(EditorMode mode);
+    virtual auto SwitchMode(EditorMode mode) -> bool;
     std::string keyCache;
 };
 

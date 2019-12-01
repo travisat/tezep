@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mode.h"
+#include "zep/mode.hpp"
 #include <future>
 #include <memory>
 #include <regex>
@@ -13,17 +13,17 @@ class ZepMode_Search : public ZepMode
 {
 public:
     ZepMode_Search(ZepEditor& editor, ZepWindow& previousWindow, ZepWindow& window, const ZepPath& startPath);
-    ~ZepMode_Search();
+    ~ZepMode_Search() override;
 
-    virtual void AddKeyPress(uint32_t key, uint32_t modifiers = 0) override;
-    virtual void Begin() override;
-    virtual void Notify(std::shared_ptr<ZepMessage> message) override;
-    
-    static const char* StaticName()
+    void AddKeyPress(uint32_t key, uint32_t modifiers) override;
+    void Begin() override;
+    void Notify(std::shared_ptr<ZepMessage> message) override;
+
+    static auto StaticName() -> const char*
     {
         return "Search";
     }
-    virtual const char* Name() const override
+    auto Name() const -> const char* override
     {
         return StaticName();
     }
@@ -44,7 +44,6 @@ private:
     void OpenSelection(OpenType type);
 
 private:
-
     // List of files found in the directory search
     struct FileSearchResult
     {
@@ -80,8 +79,8 @@ private:
     // The 'top' of the tree is the most narrow finding from a set of 'n' characters
     // index a,b,c -> index b,c -> index c
     std::vector<std::shared_ptr<IndexSet>> m_indexTree;
-   
-    // What we are searching for 
+
+    // What we are searching for
     std::string m_searchTerm;
     bool m_caseImportant = false;
 

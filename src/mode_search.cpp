@@ -1,10 +1,10 @@
-#include "zep/mode_search.h"
-#include "zep/filesystem.h"
-#include "zep/tab_window.h"
-#include "zep/window.h"
+#include "zep/mode_search.hpp"
+#include "zep/filesystem.hpp"
+#include "zep/tab_window.hpp"
+#include "zep/window.hpp"
 
-#include "zep/mcommon/logger.h"
-#include "zep/mcommon/threadutils.h"
+#include "zep/mcommon/logger.hpp"
+#include "zep/mcommon/threadutils.hpp"
 
 #include "mcommon/file/fnmatch.h"
 
@@ -12,10 +12,10 @@ namespace Zep
 {
 
 ZepMode_Search::ZepMode_Search(ZepEditor& editor, ZepWindow& launchWindow, ZepWindow& window, const ZepPath& path)
-    : ZepMode(editor),
-    m_launchWindow(launchWindow),
-    m_window(window),
-    m_startPath(path)
+    : ZepMode(editor)
+    , m_launchWindow(launchWindow)
+    , m_window(window)
+    , m_startPath(path)
 {
 }
 
@@ -41,19 +41,19 @@ void ZepMode_Search::AddKeyPress(uint32_t key, uint32_t modifiers)
         // We choose to rearrange the window and return to the previous order here.
         // If we just delete the buffer, it would have the same effect, but the editor
         // does not currently maintain a list of window orderings; so this is a second best for now.
-        // TODO: Add window order tracking along with cursors for CTRL+i/o support
+        // TODO(unknown): Add window order tracking along with cursors for CTRL+i/o support
         auto& buffer = m_window.GetBuffer();
         GetEditor().GetActiveTabWindow()->RemoveWindow(&m_window);
         GetEditor().GetActiveTabWindow()->SetActiveWindow(&m_launchWindow);
         GetEditor().RemoveBuffer(&buffer);
         return;
     }
-    else if (key == ExtKeys::RETURN)
+    if (key == ExtKeys::RETURN)
     {
         OpenSelection(OpenType::Replace);
         return;
     }
-    else if (key == ExtKeys::BACKSPACE)
+    if (key == ExtKeys::BACKSPACE)
     {
         if (m_searchTerm.length() > 0)
         {
@@ -63,7 +63,7 @@ void ZepMode_Search::AddKeyPress(uint32_t key, uint32_t modifiers)
     }
     else
     {
-        if (modifiers & ModifierKey::Ctrl)
+        if ((modifiers & ModifierKey::Ctrl) != 0)
         {
             if (key == 'j')
             {
@@ -107,7 +107,7 @@ void ZepMode_Search::AddKeyPress(uint32_t key, uint32_t modifiers)
     GetEditor().SetCommandText(str.str());
 }
 
-// TODO: Later we will have a project manager for tags, search, etc.
+// TODO(unknown): Later we will have a project manager for tags, search, etc.
 void ZepMode_Search::GetSearchPaths(const ZepPath& path, std::vector<std::string>& ignore_patterns, std::vector<std::string>& include_patterns) const
 {
     ZepPath config = path / ".zep" / "project.cfg";
@@ -305,7 +305,9 @@ void ZepMode_Search::ShowTreeResult()
 void ZepMode_Search::OpenSelection(OpenType type)
 {
     if (m_indexTree.empty())
+    {
         return;
+    }
 
     auto cursor = m_window.GetBufferCursor();
     auto line = m_window.GetBuffer().GetBufferLine(cursor);
@@ -376,7 +378,7 @@ void ZepMode_Search::UpdateTree()
 
     assert(!m_indexTree.empty());
 
-    uint32_t treeDepth = uint32_t(m_indexTree.size() - 1);
+    auto treeDepth = uint32_t(m_indexTree.size() - 1);
     if (m_searchTerm.size() < treeDepth)
     {
         while (m_searchTerm.size() < treeDepth)
@@ -392,7 +394,7 @@ void ZepMode_Search::UpdateTree()
         char startChar = m_searchTerm[m_indexTree.size() - 1];
 
         // Search for a match at the next level of the search tree
-        m_searchResult = GetEditor().GetThreadPool().enqueue([&](std::shared_ptr<IndexSet> spStartSet, const char startChar) {
+        m_searchResult = GetEditor().GetThreadPool().enqueue([&](const std::shared_ptr<IndexSet>& spStartSet, const char startChar) {
             auto spResult = std::make_shared<IndexSet>();
             for (auto& searchPair : spStartSet->indices)
             {

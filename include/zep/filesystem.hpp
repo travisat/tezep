@@ -1,12 +1,14 @@
 #pragma once
 
-#include "zep_config.h"
+#include "zep/zep_config.hpp"
 
-#include <memory>
-#include <map>
-#include <string>
-#include "zep/mcommon/file/path.h"
+#include "zep/mcommon/file/path.hpp"
+
 #include <functional>
+#include <map>
+#include <memory>
+#include <string>
+
 
 namespace Zep
 {
@@ -17,27 +19,28 @@ namespace Zep
 class IZepFileSystem
 {
 public:
-    virtual ~IZepFileSystem() {};
-    virtual std::string Read(const ZepPath& filePath) = 0;
-    virtual bool Write(const ZepPath& filePath, const void* pData, size_t size) = 0;
+    virtual ~IZepFileSystem() = default;
+    ;
+    virtual auto Read(const ZepPath& filePath) -> std::string = 0;
+    virtual auto Write(const ZepPath& filePath, const void* pData, size_t size) -> bool = 0;
 
     // The rootpath is either the git working directory or the app current working directory
-    virtual ZepPath GetSearchRoot(const ZepPath& start) const = 0;
+    [[nodiscard]] virtual auto GetSearchRoot(const ZepPath& start) const -> ZepPath = 0;
 
     // The working directory is set at start of day to the app's working parameter directory
-    virtual const ZepPath& GetWorkingDirectory() const = 0;
+    [[nodiscard]] virtual auto GetWorkingDirectory() const -> const ZepPath& = 0;
     virtual void SetWorkingDirectory(const ZepPath& path) = 0;
 
-    virtual bool IsDirectory(const ZepPath& path) const = 0;
-    virtual bool IsReadOnly(const ZepPath& path) const = 0;
-    virtual bool Exists(const ZepPath& path) const = 0;
+    [[nodiscard]] virtual auto IsDirectory(const ZepPath& path) const -> bool = 0;
+    [[nodiscard]] virtual auto IsReadOnly(const ZepPath& path) const -> bool = 0;
+    [[nodiscard]] virtual auto Exists(const ZepPath& path) const -> bool = 0;
 
-    // A callback API for scaning 
+    // A callback API for scaning
     virtual void ScanDirectory(const ZepPath& path, std::function<bool(const ZepPath& path, bool& dont_recurse)> fnScan) const = 0;
 
     // Equivalent means 'the same file'
-    virtual bool Equivalent(const ZepPath& path1, const ZepPath& path2) const = 0;
-    virtual ZepPath Canonical(const ZepPath& path) const = 0;
+    [[nodiscard]] virtual auto Equivalent(const ZepPath& path1, const ZepPath& path2) const -> bool = 0;
+    [[nodiscard]] virtual auto Canonical(const ZepPath& path) const -> ZepPath = 0;
 };
 
 // CPP File system - part of the standard C++ libraries

@@ -1,8 +1,8 @@
-#include "zep/syntax_rainbow_brackets.h"
-#include "zep/theme.h"
+#include "zep/syntax_rainbow_brackets.hpp"
+#include "zep/theme.hpp"
 
-#include "zep/mcommon/string/stringutils.h"
-#include "zep/mcommon/logger.h"
+#include "zep/mcommon/logger.hpp"
+#include "zep/mcommon/string/stringutils.hpp"
 
 // A Simple adornment to add rainbow brackets to the syntax
 namespace Zep
@@ -12,13 +12,11 @@ ZepSyntaxAdorn_RainbowBrackets::ZepSyntaxAdorn_RainbowBrackets(ZepSyntax& syntax
     : ZepSyntaxAdorn(syntax, buffer)
 {
     syntax.GetEditor().RegisterCallback(this);
-    
+
     Update(0, buffer.EndLocation());
 }
 
-ZepSyntaxAdorn_RainbowBrackets::~ZepSyntaxAdorn_RainbowBrackets()
-{
-}
+ZepSyntaxAdorn_RainbowBrackets::~ZepSyntaxAdorn_RainbowBrackets() = default;
 
 void ZepSyntaxAdorn_RainbowBrackets::Notify(std::shared_ptr<ZepMessage> spMsg)
 {
@@ -30,12 +28,11 @@ void ZepSyntaxAdorn_RainbowBrackets::Notify(std::shared_ptr<ZepMessage> spMsg)
         {
             return;
         }
-        else if (spBufferMsg->type == BufferMessageType::TextDeleted)
+        if (spBufferMsg->type == BufferMessageType::TextDeleted)
         {
             Clear(spBufferMsg->startLocation, spBufferMsg->endLocation);
         }
-        else if (spBufferMsg->type == BufferMessageType::TextAdded ||
-            spBufferMsg->type == BufferMessageType::Loaded)
+        else if (spBufferMsg->type == BufferMessageType::TextAdded || spBufferMsg->type == BufferMessageType::Loaded)
         {
             Insert(spBufferMsg->startLocation, spBufferMsg->endLocation);
             Update(spBufferMsg->startLocation, spBufferMsg->endLocation);
@@ -47,7 +44,7 @@ void ZepSyntaxAdorn_RainbowBrackets::Notify(std::shared_ptr<ZepMessage> spMsg)
     }
 }
 
-SyntaxData ZepSyntaxAdorn_RainbowBrackets::GetSyntaxAt(long offset, bool& found) const
+auto ZepSyntaxAdorn_RainbowBrackets::GetSyntaxAt(int32_t offset, bool& found) const -> SyntaxData
 {
     SyntaxData data;
     auto itr = m_brackets.find(offset);
@@ -68,11 +65,11 @@ SyntaxData ZepSyntaxAdorn_RainbowBrackets::GetSyntaxAt(long offset, bool& found)
         data.foreground = (ThemeColor)(((int32_t)ThemeColor::UniqueColor0 + itr->second.indent) % (int32_t)ThemeColor::UniqueColorLast);
         data.background = ThemeColor::None;
     }
-        
+
     return data;
 }
 
-void ZepSyntaxAdorn_RainbowBrackets::Insert(long start, long end)
+void ZepSyntaxAdorn_RainbowBrackets::Insert(int32_t start, int32_t end)
 {
     // Adjust all the brackets after us by the same distance
     auto diff = end - start;
@@ -80,16 +77,20 @@ void ZepSyntaxAdorn_RainbowBrackets::Insert(long start, long end)
     for (auto& b : m_brackets)
     {
         if (b.first < start)
+        {
             replace[b.first] = b.second;
+        }
         else
+        {
             replace[b.first + diff] = b.second;
+        }
     }
     std::swap(m_brackets, replace);
 
     RefreshBrackets();
 }
 
-void ZepSyntaxAdorn_RainbowBrackets::Clear(long start, long end)
+void ZepSyntaxAdorn_RainbowBrackets::Clear(int32_t start, int32_t end)
 {
     // Remove brackets in the erased section
     for (auto current = start; current < end; current++)
@@ -103,16 +104,20 @@ void ZepSyntaxAdorn_RainbowBrackets::Clear(long start, long end)
     for (auto& b : m_brackets)
     {
         if (b.first < start)
+        {
             replace[b.first] = b.second;
+        }
         else
+        {
             replace[b.first - diff] = b.second;
+        }
     }
     std::swap(m_brackets, replace);
 
     RefreshBrackets();
 }
 
-void ZepSyntaxAdorn_RainbowBrackets::Update(long start, long end)
+void ZepSyntaxAdorn_RainbowBrackets::Update(int32_t start, int32_t end)
 {
     auto& buffer = m_buffer.GetText();
     auto itrStart = buffer.begin() + start;
@@ -123,27 +128,27 @@ void ZepSyntaxAdorn_RainbowBrackets::Update(long start, long end)
         auto offset = itrBracket - buffer.begin();
         if (*itrBracket == '(')
         {
-            m_brackets[BufferLocation(offset)] = Bracket{0, BracketType::Bracket, true};
+            m_brackets[BufferLocation(offset)] = Bracket{ 0, BracketType::Bracket, true };
         }
         else if (*itrBracket == ')')
         {
-            m_brackets[BufferLocation(offset)] = Bracket{0, BracketType::Bracket, false};
+            m_brackets[BufferLocation(offset)] = Bracket{ 0, BracketType::Bracket, false };
         }
         else if (*itrBracket == '[')
         {
-            m_brackets[BufferLocation(offset)] = Bracket{0, BracketType::Group, true};
+            m_brackets[BufferLocation(offset)] = Bracket{ 0, BracketType::Group, true };
         }
         else if (*itrBracket == ']')
         {
-            m_brackets[BufferLocation(offset)] = Bracket{0, BracketType::Group, false};
+            m_brackets[BufferLocation(offset)] = Bracket{ 0, BracketType::Group, false };
         }
         else if (*itrBracket == '{')
         {
-            m_brackets[BufferLocation(offset)] = Bracket{0, BracketType::Brace, true};
+            m_brackets[BufferLocation(offset)] = Bracket{ 0, BracketType::Brace, true };
         }
         else if (*itrBracket == '}')
         {
-            m_brackets[BufferLocation(offset)] = Bracket{0, BracketType::Brace, false};
+            m_brackets[BufferLocation(offset)] = Bracket{ 0, BracketType::Brace, false };
         }
         else
         {
@@ -169,7 +174,7 @@ void ZepSyntaxAdorn_RainbowBrackets::RefreshBrackets()
         }
         bracket.indent = indents[int(bracket.type)];
         // Allow one bracket error, before going back to normal
-        bracket.valid = (indents[int(bracket.type)] < 0) ? false : true;
+        bracket.valid = indents[int(bracket.type)] >= 0;
         if (!bracket.valid)
         {
             indents[int(bracket.type)] = 0;
@@ -180,8 +185,7 @@ void ZepSyntaxAdorn_RainbowBrackets::RefreshBrackets()
         }
     }
 
-    auto MarkTails = [&](auto type)
-    {
+    auto MarkTails = [&](auto type) {
         if (indents[int(type)] > 0)
         {
             for (auto& b : m_brackets)
@@ -192,7 +196,6 @@ void ZepSyntaxAdorn_RainbowBrackets::RefreshBrackets()
                     return;
                 }
             }
-
         }
     };
     MarkTails(BracketType::Brace);

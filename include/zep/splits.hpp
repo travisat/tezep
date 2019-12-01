@@ -1,11 +1,12 @@
 #pragma once
 
-#include "zep/mcommon/math/math.h"
+#include "zep/mcommon/math/math.hpp"
 #include <algorithm>
 #include <limits>
 #include <memory>
-#include <vector>
 #include <ostream>
+#include <vector>
+
 
 namespace Zep
 {
@@ -17,31 +18,34 @@ enum Flags
     Fixed = (1 << 0),
     Expanding = (1 << 1)
 };
-};
+} // namespace RegionFlags
 
 struct Region
 {
     const char* pszName = nullptr;
     uint32_t flags = RegionFlags::Expanding;
-    float ratio = 1.0f;
+    float ratio = 1.0F;
     NRectf rect;
-    NVec2f min_size = NVec2f(0.0f, 0.0f);
-    NVec2f fixed_size = NVec2f(0.0f, 0.0f);
+    NVec2f min_size = NVec2f(0.0F, 0.0F);
+    NVec2f fixed_size = NVec2f(0.0F, 0.0F);
     bool vertical = true;
-    NVec2f margin = NVec2f(0.0f, 0.0f);
+    NVec2f margin = NVec2f(0.0F, 0.0F);
 
     std::shared_ptr<Region> pParent;
     std::vector<std::shared_ptr<Region>> children;
 };
 
-inline std::ostream& operator<<(std::ostream& str, const Region& region)
+inline auto operator<<(std::ostream& str, const Region& region) -> std::ostream&
 {
     static int indent = 0;
-    auto do_indent = [&str](int sz) { for (int i = 0; i < sz; i++) str << " "; };
+    auto do_indent = [&str](int sz) { for (int i = 0; i < sz; i++) { str << " "; 
+} };
 
     do_indent(indent);
-    if (region.pszName)
+    if (region.pszName != nullptr)
+    {
         str << region.pszName << " ";
+    }
     str << std::hex << &region << " -> ";
 
     str << "RC: " << region.rect << ", pParent: " << std::hex << region.pParent;
@@ -61,6 +65,5 @@ inline std::ostream& operator<<(std::ostream& str, const Region& region)
 }
 
 void LayoutRegion(Region& region);
-
 
 } // namespace Zep

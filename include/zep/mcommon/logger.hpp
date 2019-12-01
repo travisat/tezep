@@ -42,9 +42,7 @@ extern structlog LOGCFG;
 class LOG
 {
 public:
-    LOG()
-    {
-    }
+    LOG() = default;
     LOG(typelog type)
     {
         msglevel = type;
@@ -67,7 +65,7 @@ public:
         opened = false;
     }
     template <class T>
-    LOG& operator<<(const T& msg)
+    auto operator<<(const T& msg) -> LOG&
     {
         if (msglevel >= LOGCFG.level)
         {
@@ -80,23 +78,23 @@ public:
 private:
     bool opened = false;
     typelog msglevel = DEBUG;
-    inline std::string getLabel(typelog type)
+    static inline auto getLabel(typelog type) -> std::string
     {
         std::string label;
         switch (type)
         {
-            case DEBUG:
-                label = "DEBUG";
-                break;
-            case INFO:
-                label = "INFO ";
-                break;
-            case WARN:
-                label = "WARN ";
-                break;
-            case ERROR:
-                label = "ERROR";
-                break;
+        case DEBUG:
+            label = "DEBUG";
+            break;
+        case INFO:
+            label = "INFO ";
+            break;
+        case WARN:
+            label = "WARN ";
+            break;
+        case ERROR:
+            label = "ERROR";
+            break;
         }
         return label;
     }

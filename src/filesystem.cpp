@@ -1,9 +1,9 @@
-#include "zep/filesystem.h"
+#include "zep/filesystem.hpp"
 
 #include <fstream>
 
-#include "zep/mcommon/logger.h"
-#include "zep/mcommon/string/stringutils.h"
+#include "zep/mcommon/logger.hpp"
+#include "zep/mcommon/string/stringutils.hpp"
 
 #undef ERROR
 
@@ -13,9 +13,10 @@
 #include <experimental/filesystem>
 namespace cpp_fs = std::experimental::filesystem::v1;
 #else
-#include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
+
 #endif
 
 namespace Zep
@@ -129,8 +130,8 @@ void ZepFileSystemCPP::ScanDirectory(const ZepPath& path, std::function<bool(con
     // Not on apple yet!
 #ifndef __APPLE__
     for (auto itr = cpp_fs::recursive_directory_iterator(path.string());
-        itr != cpp_fs::recursive_directory_iterator();
-        itr++)
+         itr != cpp_fs::recursive_directory_iterator();
+         itr++)
     {
         auto p = ZepPath(itr->path().string());
 
@@ -212,8 +213,7 @@ ZepPath ZepFileSystemCPP::Canonical(const ZepPath& path) const
 
 ZepPath ZepFileSystemCPP::GetSearchRoot(const ZepPath& start) const
 {
-    auto findStartPath = [&](const ZepPath& startPath)
-    {
+    auto findStartPath = [&](const ZepPath& startPath) {
         if (!startPath.empty())
         {
             auto testPath = startPath;
@@ -227,9 +227,7 @@ ZepPath ZepFileSystemCPP::GetSearchRoot(const ZepPath& start) const
                 bool foundDir = false;
 
                 // Look in this dir
-                ScanDirectory(testPath, [&](const ZepPath& p, bool& recurse)
-                    -> bool
-                {
+                ScanDirectory(testPath, [&](const ZepPath& p, bool& recurse) -> bool {
                     // Not looking at sub folders
                     recurse = false;
 

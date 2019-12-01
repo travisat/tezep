@@ -53,12 +53,12 @@ class GapBuffer
 public:
     static const int DEFAULT_GAP = 1000;
 
-    typedef A allocator_type;
-    typedef typename std::allocator_traits<A>::value_type value_type;
-    typedef typename std::allocator_traits<A>::difference_type difference_type;
-    typedef typename std::allocator_traits<A>::size_type size_type;
-    typedef value_type& reference;
-    typedef const value_type& const_reference;
+    using allocator_type = A;
+    using value_type = typename std::allocator_traits<A>::value_type;
+    using difference_type = typename std::allocator_traits<A>::difference_type;
+    using size_type = typename std::allocator_traits<A>::size_type;
+    using reference = value_type &;
+    using const_reference = const value_type &;
 
     T *m_pStart = nullptr;       // Start of the buffer
     T *m_pEnd = nullptr;         // Pointer after the end 
@@ -71,11 +71,11 @@ public:
     class iterator
     {
     public:
-        typedef typename std::allocator_traits<A>::difference_type difference_type;
-        typedef typename std::allocator_traits<A>::value_type value_type;
-        typedef typename std::allocator_traits<A>::pointer pointer;
-        typedef std::random_access_iterator_tag iterator_category; //or another tag
-        typedef value_type& reference;
+        using difference_type = typename std::allocator_traits<A>::difference_type;
+        using value_type = typename std::allocator_traits<A>::value_type;
+        using pointer = typename std::allocator_traits<A>::pointer;
+        using iterator_category = std::random_access_iterator_tag; //or another tag
+        using reference = value_type &;
 
         bool skipGap = true;
         // Note: p is measured in actual characters, not entire buffer fixed_size.
@@ -88,41 +88,41 @@ public:
         iterator(const iterator& rhs) : skipGap(rhs.skipGap), p(rhs.p), buffer(rhs.buffer) { }
         ~iterator() { }
 
-        iterator& operator=(const iterator& rhs) { p = rhs.p; return *this; }
+        auto operator=(const iterator& rhs) -> iterator& { p = rhs.p; return *this; }
         
-        bool operator==(const iterator& rhs) const { return (p == rhs.p); }
-        bool operator!=(const iterator& rhs) const { return (p != rhs.p); }
+        auto operator==(const iterator& rhs) const -> bool { return (p == rhs.p); }
+        auto operator!=(const iterator& rhs) const -> bool { return (p != rhs.p); }
 
-        bool operator<(const iterator& rhs) const { return (p < rhs.p); }
-        bool operator>(const iterator& rhs) const { return (p > rhs.p); }
-        bool operator<=(const iterator& rhs) const { return (p <= rhs.p); }
-        bool operator>=(const iterator& rhs) const { return (p >= rhs.p); }
+        auto operator<(const iterator& rhs) const -> bool { return (p < rhs.p); }
+        auto operator>(const iterator& rhs) const -> bool { return (p > rhs.p); }
+        auto operator<=(const iterator& rhs) const -> bool { return (p <= rhs.p); }
+        auto operator>=(const iterator& rhs) const -> bool { return (p >= rhs.p); }
 
-        iterator& operator+=(size_type rhs) { p += rhs; return *this; }
-        iterator operator+(size_type rhs) const { return iterator(buffer, p + rhs); }
-        friend iterator operator+(size_type lhs, const iterator& rhs) { return iterator(lhs.buffer, lhs + rhs.p); }
-        iterator& operator-=(size_type rhs) { p -= rhs; return *this; }
-        iterator operator-(size_type rhs) const { return iterator(buffer, p - rhs); }
-        difference_type operator-(iterator itr) const { return p - itr.p;  }
+        auto operator+=(size_type rhs) -> iterator& { p += rhs; return *this; }
+        auto operator+(size_type rhs) const -> iterator { return iterator(buffer, p + rhs); }
+        friend auto operator+(size_type lhs, const iterator& rhs) -> iterator { return iterator(lhs.buffer, lhs + rhs.p); }
+        auto operator-=(size_type rhs) -> iterator& { p -= rhs; return *this; }
+        auto operator-(size_type rhs) const -> iterator { return iterator(buffer, p - rhs); }
+        auto operator-(iterator itr) const -> difference_type { return p - itr.p;  }
 
-        iterator& operator--() { p--; return *this; }
-        iterator operator--(int) { auto pOld = p; p--; return iterator(buffer, pOld); }
-        iterator& operator++() { p++; return *this; }
-        iterator operator++(int) { auto pOld = p; p++; return iterator(buffer, pOld); }
+        auto operator--() -> iterator& { p--; return *this; }
+        auto operator--(int) -> iterator { auto pOld = p; p--; return iterator(buffer, pOld); }
+        auto operator++() -> iterator& { p++; return *this; }
+        auto operator++(int) -> iterator { auto pOld = p; p++; return iterator(buffer, pOld); }
 
-        reference operator*() const { return *buffer.GetBufferPtr(p, skipGap); }
-        pointer operator->() const { return buffer.GetBufferPtr(p, skipGap); }
-        reference operator[](size_type distance) const { return buffer.GetBufferPtr(p + distance, skipGap); }
+        auto operator*() const -> reference { return *buffer.GetBufferPtr(p, skipGap); }
+        auto operator->() const -> pointer { return buffer.GetBufferPtr(p, skipGap); }
+        auto operator[](size_type distance) const -> reference { return buffer.GetBufferPtr(p + distance, skipGap); }
     };
 
     class const_iterator 
     {
     public:
-        typedef typename std::allocator_traits<A>::difference_type difference_type;
-        typedef typename std::allocator_traits<A>::value_type value_type;
-        typedef typename std::allocator_traits<A>::pointer pointer;
-        typedef std::random_access_iterator_tag iterator_category; //or another tag
-        typedef value_type& reference;
+        using difference_type = typename std::allocator_traits<A>::difference_type;
+        using value_type = typename std::allocator_traits<A>::value_type;
+        using pointer = typename std::allocator_traits<A>::pointer;
+        using iterator_category = std::random_access_iterator_tag; //or another tag
+        using reference = value_type &;
 
         bool skipGap = true;
         size_t p = 0;
@@ -133,60 +133,60 @@ public:
         const_iterator(const const_iterator& rhs) : skipGap(rhs.skipGap), p(rhs.p), buffer(rhs.buffer) { }
         ~const_iterator() { }
 
-        const_iterator& operator=(const const_iterator& rhs) { p = rhs.p; return *this; }
-        bool operator==(const const_iterator& rhs) const { return (p == rhs.p); }
-        bool operator!=(const const_iterator& rhs) const { return (p != rhs.p); }
+        auto operator=(const const_iterator& rhs) -> const_iterator& { p = rhs.p; return *this; }
+        auto operator==(const const_iterator& rhs) const -> bool { return (p == rhs.p); }
+        auto operator!=(const const_iterator& rhs) const -> bool { return (p != rhs.p); }
 
-        bool operator<(const const_iterator& rhs) const { return (p < rhs.p); }
-        bool operator>(const const_iterator& rhs) const { return (p > rhs.p); }
-        bool operator<=(const const_iterator& rhs) const { return (p <= rhs.p); }
-        bool operator>=(const const_iterator& rhs) const { return (p >= rhs.p); }
+        auto operator<(const const_iterator& rhs) const -> bool { return (p < rhs.p); }
+        auto operator>(const const_iterator& rhs) const -> bool { return (p > rhs.p); }
+        auto operator<=(const const_iterator& rhs) const -> bool { return (p <= rhs.p); }
+        auto operator>=(const const_iterator& rhs) const -> bool { return (p >= rhs.p); }
 
-        const_iterator& operator++() { p++; return *this; };
-        const_iterator operator++(int) { auto pOld = p; p++; return const_iterator(buffer, pOld); }
-        const_iterator& operator--() { p--; return *this; }
-        const_iterator operator--(int) { auto pOld = p; p--; return const_iterator(buffer, pOld); }
+        auto operator++() -> const_iterator& { p++; return *this; };
+        auto operator++(int) -> const_iterator { auto pOld = p; p++; return const_iterator(buffer, pOld); }
+        auto operator--() -> const_iterator& { p--; return *this; }
+        auto operator--(int) -> const_iterator { auto pOld = p; p--; return const_iterator(buffer, pOld); }
 
-        const_iterator& operator+=(size_type rhs) { p += rhs; return *this; }
-        const_iterator operator+(size_type rhs) const { return const_iterator(buffer, p + rhs); }
-        friend const_iterator operator+(size_type lhs, const const_iterator& rhs) { return const_iterator(lhs.buffer, lhs + rhs.p); }
-        const_iterator& operator-=(size_type rhs) { p -= rhs; return *this; }
-        const_iterator operator-(size_type rhs) const { return const_iterator(buffer, p - rhs); }
-        difference_type operator-(const_iterator itr) const { return p - itr.p;  }
+        auto operator+=(size_type rhs) -> const_iterator& { p += rhs; return *this; }
+        auto operator+(size_type rhs) const -> const_iterator { return const_iterator(buffer, p + rhs); }
+        friend auto operator+(size_type lhs, const const_iterator& rhs) -> const_iterator { return const_iterator(lhs.buffer, lhs + rhs.p); }
+        auto operator-=(size_type rhs) -> const_iterator& { p -= rhs; return *this; }
+        auto operator-(size_type rhs) const -> const_iterator { return const_iterator(buffer, p - rhs); }
+        auto operator-(const_iterator itr) const -> difference_type { return p - itr.p;  }
 
-        reference operator*() const { return *buffer.GetBufferPtr(p, skipGap); }
-        pointer operator->() const { return buffer.GetBufferPtr(p, skipGap); }
-        reference operator[](size_type distance) const { return buffer.GetBufferPtr(p + distance, skipGap); }
+        auto operator*() const -> reference { return *buffer.GetBufferPtr(p, skipGap); }
+        auto operator->() const -> pointer { return buffer.GetBufferPtr(p, skipGap); }
+        auto operator[](size_type distance) const -> reference { return buffer.GetBufferPtr(p + distance, skipGap); }
     };
 
-    typedef std::reverse_iterator<iterator> reverse_iterator;
-    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+    using reverse_iterator = std::reverse_iterator<iterator>;
+    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 public:
-    iterator begin() { return iterator(*this, 0); }
-    const_iterator begin() const { return const_iterator(*this, 0); }
-    const_iterator cbegin() const { return const_iterator(*this, 0); }
-    iterator end() { return iterator(*this, size()); };
-    const_iterator end() const { return const_iterator(*this, size()); }
-    const_iterator cend() const { return const_iterator(*this, size()); }
+    auto begin() -> iterator { return iterator(*this, 0); }
+    auto begin() const -> const_iterator { return const_iterator(*this, 0); }
+    auto cbegin() const -> const_iterator { return const_iterator(*this, 0); }
+    auto end() -> iterator { return iterator(*this, size()); };
+    auto end() const -> const_iterator { return const_iterator(*this, size()); }
+    auto cend() const -> const_iterator { return const_iterator(*this, size()); }
 
-    bool operator==(const GapBuffer<T>& rhs) const { return this == &rhs; }
-    bool operator!=(const GapBuffer<T>& rhs) const { return this != &rhs; }
+    auto operator==(const GapBuffer<T>& rhs) const -> bool { return this == &rhs; }
+    auto operator!=(const GapBuffer<T>& rhs) const -> bool { return this != &rhs; }
      
     // Size is fixed_size of buffer - the gap fixed_size
-    inline size_type size() const { return (m_pEnd - m_pStart) - (m_pGapEnd - m_pGapStart); }
+    inline auto size() const -> size_type { return (m_pEnd - m_pStart) - (m_pGapEnd - m_pGapStart); }
 
     // No current limit ; not sure how to calculate the ram max fixed_size here
-    size_type max_size() const { return std::numeric_limits<size_t>::max(); }
+    auto max_size() const -> size_type { return std::numeric_limits<size_t>::max(); }
 
     // An empty buffer 
-    inline bool empty() const { return size() == 0; }
+    [[nodiscard]] inline auto empty() const -> bool { return size() == 0; }
 
     // Return the allocator
-    A get_allocator() const { return _alloc; } 
+    auto get_allocator() const -> A { return _alloc; } 
 
     // No assign/copy for now
-    GapBuffer(int size = 0, int gapSize = DEFAULT_GAP)
+    explicit GapBuffer(int size = 0, int gapSize = DEFAULT_GAP)
         : m_defaultGap(gapSize)
     {
         if (size == 0)
@@ -201,7 +201,7 @@ public:
 
     // No copy constructor yet
     GapBuffer(const GapBuffer& copy) = delete;
-    GapBuffer& operator=(const GapBuffer& copy) = delete;
+    auto operator=(const GapBuffer& copy) -> GapBuffer& = delete;
 
     virtual ~GapBuffer() { Free(); }
 
@@ -316,7 +316,7 @@ public:
 
     // Return a string version of the gap, optionally showing the gap fixed_size
     // inside ||.  This is used for testing/validation
-    std::string string(bool showGap = false) const
+    [[nodiscard]] auto string(bool showGap = false) const -> std::string
     {
         std::string str;
        
@@ -391,7 +391,7 @@ public:
     }
 
     template<class iter>
-    iterator insert(const_iterator pt, iter srcStart, iter srcEnd)
+    auto insert(const_iterator pt, iter srcStart, iter srcEnd) -> iterator
     {
         // Insert backwards - test it?
         auto spaceRequired = std::distance(srcStart, srcEnd);
@@ -413,7 +413,7 @@ public:
         return iterator(*this, pt.p);
     }
 
-    iterator erase(const_iterator start, const_iterator end)
+    auto erase(const_iterator start, const_iterator end) -> iterator
     {
         assert(start.p < size() && end.p < (size() + 1));
         MoveGap(start.p);
@@ -428,7 +428,7 @@ public:
         return iterator(*this, start.p);
     }
     
-    iterator erase(const_iterator start)
+    auto erase(const_iterator start) -> iterator
     {
         assert(start.p < size());
         MoveGap(start.p);
@@ -439,25 +439,25 @@ public:
         return iterator(*this, start.p);
     }
 
-    reference front()
+    auto front() -> reference
     {
         assert(!empty());
         return *GetGaplessPtr(0);
     }
 
-    const_reference front() const
+    auto front() const -> const_reference
     {
         assert(!empty());
         return *GetGaplessPtr(0);
     }
 
-    reference back()
+    auto back() -> reference
     {
         assert(!empty());
         return *GetGaplessPtr(size() - 1);
     }
 
-    const_reference back() const
+    auto back() const -> const_reference
     {
         assert(!empty());
         return *GetGaplessPtr(size() - 1);
@@ -507,24 +507,24 @@ public:
         m_pGapStart--;
     }
 
-    reference operator[](size_type pos)
+    auto operator[](size_type pos) -> reference
     {
         assert(pos < size());
         return *GetGaplessPtr(pos);
     }
 
-    const_reference operator[](size_type pos) const
+    auto operator[](size_type pos) const -> const_reference
     {
         assert(pos < size());
         return *GetGaplessPtr(pos);
     }
 
-    reference at(size_type pos)
+    auto at(size_type pos) -> reference
     {
         assert(pos < size());
         return *GetGaplessPtr(pos);
     }
-    const_reference at(size_type pos) const
+    auto at(size_type pos) const -> const_reference
     {
         assert(pos < size());
         return *GetGaplessPtr(pos);
@@ -534,7 +534,7 @@ public:
     // either side of the gap.  This is more efficient that using an iterator which will keep
     // checking for the gap and trying to jump it
     template<class ForwardIt>
-    T* find_first_of(T* pStart,  T* pEnd, ForwardIt s_first, ForwardIt s_last) const
+    auto find_first_of(T* pStart,  T* pEnd, ForwardIt s_first, ForwardIt s_last) const -> T*
     {
         assert(pEnd <= m_pEnd);
         assert(pStart <= pEnd);
@@ -575,7 +575,7 @@ public:
     }
 
     template<class ForwardIt>
-    T* find_first_not_of(T* pStart,  T* pEnd, ForwardIt s_first, ForwardIt s_last) const
+    auto find_first_not_of(T* pStart,  T* pEnd, ForwardIt s_first, ForwardIt s_last) const -> T*
     {
         bool found;
         while (pStart < m_pGapStart &&
@@ -625,8 +625,8 @@ public:
 
     // Wrappers around find_*
     template<class ForwardIt>
-    const_iterator find_first_of(const_iterator first, const_iterator last,
-                          ForwardIt s_first, ForwardIt s_last) const
+    auto find_first_of(const_iterator first, const_iterator last,
+                          ForwardIt s_first, ForwardIt s_last) const -> const_iterator
     {
         assert(first <= last);
         T* pVal = find_first_of(GetGaplessPtr(first.p), GetGaplessPtr(last.p), s_first, s_last);
@@ -639,8 +639,8 @@ public:
     }
 
     template<class ForwardIt>
-    const_iterator find_first_not_of(const_iterator first, const_iterator last,
-                          ForwardIt s_first, ForwardIt s_last) const
+    auto find_first_not_of(const_iterator first, const_iterator last,
+                          ForwardIt s_first, ForwardIt s_last) const -> const_iterator
     {
         T* pVal = find_first_not_of(GetGaplessPtr(first.p), GetGaplessPtr(last.p), s_first, s_last);
         auto itr = const_iterator(*this, GetGaplessOffset(pVal));
@@ -651,8 +651,8 @@ public:
     }
 
     template<class ForwardIt>
-    iterator find_first_of(iterator first, iterator last,
-                          ForwardIt s_first, ForwardIt s_last) 
+    auto find_first_of(iterator first, iterator last,
+                          ForwardIt s_first, ForwardIt s_last) -> iterator 
     {
         assert(first <= last);
         T* pVal = find_first_of(GetGaplessPtr(first.p), GetGaplessPtr(last.p), s_first, s_last);
@@ -665,8 +665,8 @@ public:
     }
 
     template<class ForwardIt>
-    iterator find_first_not_of(iterator first, iterator last,
-                          ForwardIt s_first, ForwardIt s_last)
+    auto find_first_not_of(iterator first, iterator last,
+                          ForwardIt s_first, ForwardIt s_last) -> iterator
     {
         T* pVal = find_first_not_of(GetGaplessPtr(first.p), GetGaplessPtr(last.p), s_first, s_last);
         auto itr = iterator(*this, GetGaplessOffset(pVal));
@@ -693,7 +693,7 @@ private:
     }
 
     // Return a buffer pos, but skip the gap - used by iterators to walk the buffer
-    inline T* GetBufferPtr(size_t offset, bool skipGap = true) const
+    inline auto GetBufferPtr(size_t offset, bool skipGap = true) const -> T*
     {
         T* pos = m_pStart + offset;
         if (skipGap && pos >= m_pGapStart)
@@ -704,7 +704,7 @@ private:
         return pos;
     }
 
-    // TODO: Combine these if necessary for perf
+    // TODO(unknown): Combine these if necessary for perf
     // We can probably be smarter about moving the gap if we are also resizing
     inline void EnsureGapPosAndSize(size_t p, size_t size)
     {
@@ -717,7 +717,7 @@ private:
     }
 
     // Get a pointer to the data ignoring the gap
-    inline T* GetGaplessPtr(size_t offset) const
+    inline auto GetGaplessPtr(size_t offset) const -> T*
     {
         T* pos = m_pStart + offset;
         if (pos >= m_pGapStart)
@@ -728,7 +728,7 @@ private:
     }
 
     // Get an offset to the data, ignoring the gap (external offset)
-    inline size_t GetGaplessOffset(T* p) const
+    inline auto GetGaplessOffset(T* p) const -> size_t
     {
         size_t offset = p - m_pStart;
         if (p >= m_pGapStart)
@@ -739,13 +739,13 @@ private:
     }
 
     // The fixed_size of the buffer, including the gap
-    inline size_t CurrentSizeWithGap() const
+    [[nodiscard]] inline auto CurrentSizeWithGap() const -> size_t
     {
         return m_pEnd - m_pStart;
     }
 
     // The fixed_size of the gap (will grow and shrink as necessary)
-    inline size_t CurrentGapSize() const
+    [[nodiscard]] inline auto CurrentGapSize() const -> size_t
     {
         return m_pGapEnd - m_pGapStart;
     }

@@ -7,14 +7,14 @@
 #include <QKeyEvent>
 #include <QDesktopWidget>
 
-#include "zep/editor.h"
-#include "zep/mode.h"
-#include "zep/mode_standard.h"
-#include "zep/mode_vim.h"
-#include "zep/tab_window.h"
-#include "zep/window.h"
+#include "zep/editor.hpp"
+#include "zep/mode.hpp"
+#include "zep/mode_standard.hpp"
+#include "zep/mode_vim.hpp"
+#include "zep/tab_window.hpp"
+#include "zep/window.hpp"
 
-#include "zep/qt/zepdisplay_qt.h"
+#include "zep/qt/zepdisplay_qt.hpp"
 
 namespace Zep
 {

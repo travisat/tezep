@@ -1,6 +1,8 @@
 #pragma once
 
-#include "buffer.h"
+#include <array>
+
+#include "zep/buffer.hpp"
 
 namespace Zep
 {
@@ -21,24 +23,24 @@ struct SelectRegion
 class ZepDisplay
 {
 public:
-    virtual ~ZepDisplay(){};
+    virtual ~ZepDisplay()= default;;
 
     // Renderer specific overrides
     // Implement these to draw the buffer using whichever system you prefer
-    virtual NVec2f GetTextSize(const utf8* pBegin, const utf8* pEnd = nullptr) const = 0;
-    virtual float GetFontPointSize() const = 0;
+    virtual auto GetTextSize(const utf8* pBegin, const utf8* pEnd) const -> NVec2f = 0;
+    [[nodiscard]] virtual auto GetFontPointSize() const -> float = 0;
     virtual void SetFontPointSize(float size)
     {
         (void)size;
     };
-    virtual float GetFontHeightPixels() const = 0;
-    virtual void DrawLine(const NVec2f& start, const NVec2f& end, const NVec4f& color = NVec4f(1.0f), float width = 1.0f) const = 0;
-    virtual void DrawChars(const NVec2f& pos, const NVec4f& col, const utf8* text_begin, const utf8* text_end = nullptr) const = 0;
-    virtual void DrawRectFilled(const NRectf& rc, const NVec4f& col = NVec4f(1.0f)) const = 0;
+    [[nodiscard]] virtual auto GetFontHeightPixels() const -> float = 0;
+    virtual void DrawLine(const NVec2f& start, const NVec2f& end, const NVec4f& color, float width) const = 0;
+    virtual void DrawChars(const NVec2f& pos, const NVec4f& col, const utf8* text_begin, const utf8* text_end) const = 0;
+    virtual void DrawRectFilled(const NRectf& rc, const NVec4f& col) const = 0;
     virtual void SetClipRect(const NRectf& rc) = 0;
 
-    virtual NVec2f GetCharSize(const utf8* pChar);
-    virtual const NVec2f& GetDefaultCharSize();
+    virtual auto GetCharSize(const utf8* pChar) -> NVec2f;
+    virtual auto GetDefaultCharSize() -> const NVec2f&;
     virtual void InvalidateCharCache();
 
 protected:
@@ -46,7 +48,7 @@ protected:
 
 protected:
     bool m_charCacheDirty = true;
-    NVec2f m_charCache[256];
+    std::array<NVec2f, 256> m_charCache;
     NVec2f m_defaultCharSize;
 };
 
@@ -56,38 +58,38 @@ protected:
 class ZepDisplayNull : public ZepDisplay
 {
 public:
-    virtual NVec2f GetTextSize(const utf8* pBegin, const utf8* pEnd = nullptr) const override
+     auto GetTextSize(const utf8* pBegin, const utf8* pEnd) const -> NVec2f override
     {
-        return NVec2f(float(pEnd - pBegin), 10.0f);
+        return NVec2f(float(pEnd - pBegin), 10.0F);
     }
-    virtual float GetFontPointSize() const override
-    {
-        return 10;
-    }
-    virtual float GetFontHeightPixels() const override
+    [[nodiscard]]  auto GetFontPointSize() const -> float override
     {
         return 10;
     }
-    virtual void DrawLine(const NVec2f& start, const NVec2f& end, const NVec4f& color = NVec4f(1.0f), float width = 1.0f) const override
+     [[nodiscard]] auto GetFontHeightPixels() const -> float override
+    {
+        return 10;
+    }
+     void DrawLine(const NVec2f& start, const NVec2f& end, const NVec4f& color, float width) const override
     {
         (void)start;
         (void)end;
         (void)color;
         (void)width;
     };
-    virtual void DrawChars(const NVec2f& pos, const NVec4f& col, const utf8* text_begin, const utf8* text_end = nullptr) const override
+     void DrawChars(const NVec2f& pos, const NVec4f& col, const utf8* text_begin, const utf8* text_end) const override
     {
         (void)pos;
         (void)col;
         (void)text_begin;
         (void)text_end;
     }
-    virtual void DrawRectFilled(const NRectf& a, const NVec4f& col = NVec4f(1.0f)) const override
+     void DrawRectFilled(const NRectf& a, const NVec4f& col) const override
     {
         (void)a;
         (void)col;
     };
-    virtual void SetClipRect(const NRectf& rc) override
+     void SetClipRect(const NRectf& rc) override
     {
         (void)rc;
     }

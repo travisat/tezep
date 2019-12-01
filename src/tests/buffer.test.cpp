@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "zep/buffer.h"
+#include "zep/buffer.hpp"
 
 using namespace Zep;
 

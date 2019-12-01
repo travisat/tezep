@@ -1,13 +1,13 @@
-#include "zep/mode.h"
-#include "zep/buffer.h"
-#include "zep/commands.h"
-#include "zep/editor.h"
-#include "zep/filesystem.h"
-#include "zep/mode_search.h"
-#include "zep/tab_window.h"
-#include "zep/window.h"
+#include "zep/mode.hpp"
+#include "zep/buffer.hpp"
+#include "zep/commands.hpp"
+#include "zep/editor.hpp"
+#include "zep/filesystem.hpp"
+#include "zep/mode_search.hpp"
+#include "zep/tab_window.hpp"
+#include "zep/window.hpp"
 
-#include "zep/mcommon/logger.h"
+#include "zep/mcommon/logger.hpp"
 
 namespace Zep
 {
@@ -17,20 +17,18 @@ ZepMode::ZepMode(ZepEditor& editor)
 {
 }
 
-ZepMode::~ZepMode()
-{
-}
+ZepMode::~ZepMode() = default;
 
-ZepWindow* ZepMode::GetCurrentWindow() const
+auto ZepMode::GetCurrentWindow() const -> ZepWindow*
 {
-    if (GetEditor().GetActiveTabWindow())
+    if (GetEditor().GetActiveTabWindow() != nullptr)
     {
         return GetEditor().GetActiveTabWindow()->GetActiveWindow();
     }
     return nullptr;
 }
 
-EditorMode ZepMode::GetEditorMode() const
+auto ZepMode::GetEditorMode() const -> EditorMode
 {
     return m_currentMode;
 }
@@ -40,17 +38,17 @@ void ZepMode::SetEditorMode(EditorMode mode)
     m_currentMode = mode;
 }
 
-void ZepMode::AddCommandText(std::string strText)
+void ZepMode::AddCommandText(const std::string& strText)
 {
     for (auto& ch : strText)
     {
-        AddKeyPress(ch);
+        AddKeyPress(ch, ModifierKey::None);
     }
 }
 
-void ZepMode::AddCommand(std::shared_ptr<ZepCommand> spCmd)
+void ZepMode::AddCommand(const std::shared_ptr<ZepCommand>& spCmd)
 {
-    if (GetCurrentWindow() && GetCurrentWindow()->GetBuffer().TestFlags(FileFlags::Locked))
+    if ((GetCurrentWindow() != nullptr) && GetCurrentWindow()->GetBuffer().TestFlags(FileFlags::Locked))
     {
         // Ignore commands on buffers because we are view only,
         // and all commands currently modify the buffer!
@@ -80,7 +78,7 @@ void ZepMode::Redo()
             auto& spCommand = m_redoStack.top();
             spCommand->Redo();
 
-            if (spCommand->GetFlags() & CommandFlags::GroupBoundary)
+            if ((spCommand->GetFlags() & CommandFlags::GroupBoundary) != 0)
             {
                 inGroup = !inGroup;
             }
@@ -110,7 +108,7 @@ void ZepMode::Undo()
             auto& spCommand = m_undoStack.top();
             spCommand->Undo();
 
-            if (spCommand->GetFlags() & CommandFlags::GroupBoundary)
+            if ((spCommand->GetFlags() & CommandFlags::GroupBoundary) != 0)
             {
                 inGroup = !inGroup;
             }
@@ -130,14 +128,14 @@ void ZepMode::Undo()
     } while (inGroup);
 }
 
-NVec2i ZepMode::GetVisualRange() const
+auto ZepMode::GetVisualRange() const -> NVec2i
 {
     return NVec2i(m_visualBegin, m_visualEnd);
 }
 
-bool ZepMode::HandleGlobalCommand(const std::string& cmd, uint32_t modifiers, bool& needMoreChars)
+auto ZepMode::HandleGlobalCommand(const std::string& cmd, uint32_t modifiers, bool& needMoreChars) -> bool
 {
-    if (modifiers & ModifierKey::Ctrl)
+    if ((modifiers & ModifierKey::Ctrl) != 0)
     {
         return HandleGlobalCtrlCommand(cmd, modifiers, needMoreChars);
     }
@@ -158,11 +156,11 @@ bool ZepMode::HandleGlobalCommand(const std::string& cmd, uint32_t modifiers, bo
     return false;
 }
 
-bool ZepMode::HandleGlobalCtrlCommand(const std::string& cmd, uint32_t modifiers, bool& needMoreChars)
+auto ZepMode::HandleGlobalCtrlCommand(const std::string& cmd, uint32_t modifiers, bool& needMoreChars) -> bool
 {
     needMoreChars = false;
 
-    // TODO: I prefer 'ko' but I need to put in a keymapper which can see when the user hasn't pressed a second key in a given time
+    // TODO(unknown): I prefer 'ko' but I need to put in a keymapper which can see when the user hasn't pressed a second key in a given time
     // otherwise, this hides 'ctrl+k' for pane navigation!
     if (cmd[0] == 'i')
     {
@@ -196,7 +194,9 @@ bool ZepMode::HandleGlobalCtrlCommand(const std::string& cmd, uint32_t modifiers
                 for (auto& p : searchPaths)
                 {
                     if (p.empty())
+                    {
                         continue;
+                    }
 
                     bool found = false;
 
@@ -242,51 +242,53 @@ bool ZepMode::HandleGlobalCtrlCommand(const std::string& cmd, uint32_t modifiers
                             return true;
                         });
                         if (found)
+                        {
                             return true;
+                        }
                     }
                 }
             }
         }
         return true;
     }
-    else if (cmd == "=" || ((cmd == "+") && (modifiers & ModifierKey::Shift)))
+    if (cmd == "=" || ((cmd == "+") && ((modifiers & ModifierKey::Shift) != 0)))
     {
-        GetEditor().GetDisplay().SetFontPointSize(std::min(GetEditor().GetDisplay().GetFontPointSize() + 1.0f, 20.0f));
+        GetEditor().GetDisplay().SetFontPointSize(std::min(GetEditor().GetDisplay().GetFontPointSize() + 1.0F, 20.0F));
         return true;
     }
-    else if (cmd == "-" || ((cmd == "_") && (modifiers & ModifierKey::Shift)))
+    if (cmd == "-" || ((cmd == "_") && ((modifiers & ModifierKey::Shift) != 0)))
     {
-        GetEditor().GetDisplay().SetFontPointSize(std::max(10.0f, GetEditor().GetDisplay().GetFontPointSize() - 1.0f));
+        GetEditor().GetDisplay().SetFontPointSize(std::max(10.0F, GetEditor().GetDisplay().GetFontPointSize() - 1.0F));
         return true;
     }
     // Moving between splits
-    else if (cmd == "j")
+    if (cmd == "j")
     {
         GetCurrentWindow()->GetTabWindow().DoMotion(WindowMotion::Down);
         return true;
     }
-    else if (cmd == "k")
+    if (cmd == "k")
     {
         GetCurrentWindow()->GetTabWindow().DoMotion(WindowMotion::Up);
         return true;
     }
-    else if (cmd == "h")
+    if (cmd == "h")
     {
         GetCurrentWindow()->GetTabWindow().DoMotion(WindowMotion::Left);
         return true;
     }
-    else if (cmd == "l")
+    if (cmd == "l")
     {
         GetCurrentWindow()->GetTabWindow().DoMotion(WindowMotion::Right);
         return true;
     }
     // global search
-    else if (cmd == "p" || cmd == ",")
+    if (cmd == "p" || cmd == ",")
     {
         GetEditor().AddSearch();
         return true;
     }
-    else if (cmd == "r")
+    if (cmd == "r")
     {
         Redo();
         return true;

@@ -1,10 +1,10 @@
-#include "zep/syntax.h"
-#include "zep/editor.h"
-#include "zep/syntax_rainbow_brackets.h"
-#include "zep/theme.h"
+#include "zep/syntax.hpp"
+#include "zep/editor.hpp"
+#include "zep/syntax_rainbow_brackets.hpp"
+#include "zep/theme.hpp"
 
-#include "zep/mcommon/logger.h"
-#include "zep/mcommon/string/stringutils.h"
+#include "zep/mcommon/logger.hpp"
+#include "zep/mcommon/string/stringutils.hpp"
 
 #include <string>
 #include <vector>
@@ -33,10 +33,10 @@ ZepSyntax::~ZepSyntax()
     Interrupt();
 }
 
-SyntaxData ZepSyntax::GetSyntaxAt(long offset) const
+auto ZepSyntax::GetSyntaxAt(int32_t offset) const -> SyntaxData
 {
     Wait();
-    if (m_processedChar < offset || (long)m_syntax.size() <= offset)
+    if (m_processedChar < offset || m_syntax.size() <= offset)
     {
         return SyntaxData{};
     }
@@ -80,15 +80,15 @@ void ZepSyntax::QueueUpdateSyntax(BufferLocation startLocation, BufferLocation e
     // ensure that multiple calls to restart the thread keep track of where to start
     // This means a small edit at the end of a big file, followed by a small edit at the top
     // is the worst case scenario, because
-    m_processedChar = std::min(startLocation, long(m_processedChar));
-    m_targetChar = std::max(endLocation, long(m_targetChar));
+    m_processedChar = std::min(startLocation, int32_t(m_processedChar));
+    m_targetChar = std::max(endLocation, int32_t(m_targetChar));
 
     // Make sure the syntax buffer is big enough - adding normal syntax to the end
     // This may also 'chop'
     m_syntax.resize(m_buffer.GetText().size(), SyntaxData{});
 
-    m_processedChar = std::min(long(m_processedChar), long(m_buffer.GetText().size() - 1));
-    m_targetChar = std::min(long(m_targetChar), long(m_buffer.GetText().size() - 1));
+    m_processedChar = std::min(int32_t(m_processedChar), int32_t(m_buffer.GetText().size() - 1));
+    m_targetChar = std::min(int32_t(m_targetChar), int32_t(m_buffer.GetText().size() - 1));
 
     // Have the thread update the syntax in the new region
     // If the pool has no threads, this will end up serial
@@ -117,8 +117,7 @@ void ZepSyntax::Notify(std::shared_ptr<ZepMessage> spMsg)
             m_syntax.erase(m_syntax.begin() + spBufferMsg->startLocation, m_syntax.begin() + spBufferMsg->endLocation);
             QueueUpdateSyntax(spBufferMsg->startLocation, spBufferMsg->endLocation);
         }
-        else if (spBufferMsg->type == BufferMessageType::TextAdded ||
-            spBufferMsg->type == BufferMessageType::Loaded)
+        else if (spBufferMsg->type == BufferMessageType::TextAdded || spBufferMsg->type == BufferMessageType::Loaded)
         {
             Interrupt();
             m_syntax.insert(m_syntax.begin() + spBufferMsg->startLocation, spBufferMsg->endLocation - spBufferMsg->startLocation, SyntaxData{});
@@ -132,7 +131,7 @@ void ZepSyntax::Notify(std::shared_ptr<ZepMessage> spMsg)
     }
 }
 
-// TODO: Multiline comments
+// TODO(unknown): Multiline comments
 void ZepSyntax::UpdateSyntax()
 {
     auto& buffer = m_buffer.GetText();
@@ -141,7 +140,6 @@ void ZepSyntax::UpdateSyntax()
 
     assert(std::distance(itrCurrent, itrEnd) < int(m_syntax.size()));
     assert(m_syntax.size() == buffer.size());
-
 
     std::string delim(" \t.\n;(){}=:");
     std::string lineEnd("\n");
@@ -167,17 +165,12 @@ void ZepSyntax::UpdateSyntax()
     itrEnd = buffer.find_first_of(itrEnd, buffer.end(), lineEnd.begin(), lineEnd.end());
 
     // Mark a region of the syntax buffer with the correct marker
-    auto mark = [&](GapBuffer<utf8>::const_iterator itrA, GapBuffer<utf8>::const_iterator itrB, ThemeColor type, ThemeColor background) {
+    auto mark = [&](const GapBuffer<utf8>::const_iterator& itrA, const GapBuffer<utf8>::const_iterator& itrB, ThemeColor type, ThemeColor background) {
         std::fill(m_syntax.begin() + (itrA - buffer.begin()), m_syntax.begin() + (itrB - buffer.begin()), SyntaxData{ type, background });
     };
 
-    auto markSingle = [&](GapBuffer<utf8>::const_iterator itrA, ThemeColor type, ThemeColor background) {
-        (m_syntax.begin() + (itrA - buffer.begin()))->foreground = type;
-        (m_syntax.begin() + (itrA - buffer.begin()))->background = background;
-    };
-
     // Update start location
-    m_processedChar = long(itrCurrent - buffer.begin());
+    m_processedChar = int32_t(itrCurrent - buffer.begin());
 
     LOG(DEBUG) << "Updating Syntax: Start=" << m_processedChar << ", End=" << std::distance(buffer.begin(), itrEnd);
 
@@ -192,7 +185,9 @@ void ZepSyntax::UpdateSyntax()
         // Find a token, skipping delim <itrFirst, itrLast>
         auto itrFirst = buffer.find_first_not_of(itrCurrent, buffer.end(), delim.begin(), delim.end());
         if (itrFirst == buffer.end())
+        {
             break;
+        }
 
         auto itrLast = buffer.find_first_of(itrFirst, buffer.end(), delim.begin(), delim.end());
 
@@ -210,7 +205,7 @@ void ZepSyntax::UpdateSyntax()
 
         // Do I need to make a string here?
         auto token = std::string(itrFirst, itrLast);
-        if (m_flags & ZepSyntaxFlags::CaseInsensitive)
+        if ((m_flags & ZepSyntaxFlags::CaseInsensitive) != 0)
         {
             token = string_tolower(token);
         }
@@ -291,8 +286,8 @@ void ZepSyntax::UpdateSyntax()
 
     // If we got here, we sucessfully completed
     // Reset the target to the beginning
-    m_targetChar = long(0);
-    m_processedChar = long(buffer.size() - 1);
+    m_targetChar = 0;
+    m_processedChar = buffer.size() - 1;
 }
 
 } // namespace Zep

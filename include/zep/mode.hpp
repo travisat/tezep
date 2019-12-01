@@ -1,8 +1,8 @@
 #pragma once
 
+#include "zep/buffer.hpp"
+#include "zep/display.hpp"
 #include <stack>
-#include "buffer.h"
-#include "display.h"
 
 namespace Zep
 {
@@ -71,18 +71,18 @@ enum class EditorMode
 class ZepMode : public ZepComponent
 {
 public:
-    ZepMode(ZepEditor& editor);
-    virtual ~ZepMode();
+    explicit ZepMode(ZepEditor& editor);
+    ~ZepMode() override;
 
     // Keys handled by modes
-    virtual void AddCommandText(std::string strText);
-    virtual void AddKeyPress(uint32_t key, uint32_t modifierKeys = ModifierKey::None) = 0;
-    virtual const char* Name() const = 0;
-    virtual void Notify(std::shared_ptr<ZepMessage> message) override
+    virtual void AddCommandText(const std::string& strText);
+    virtual void AddKeyPress(uint32_t key, uint32_t modifierKeys) = 0;
+    [[nodiscard]] virtual auto Name() const -> const char* = 0;
+    void Notify(std::shared_ptr<ZepMessage> message) override
     {
     }
-    virtual void AddCommand(std::shared_ptr<ZepCommand> spCmd);
-    virtual EditorMode GetEditorMode() const;
+    virtual void AddCommand(const std::shared_ptr<ZepCommand>& spCmd);
+    [[nodiscard]] virtual auto GetEditorMode() const -> EditorMode;
     virtual void SetEditorMode(EditorMode mode);
 
     // Called when we begin editing in this mode
@@ -91,13 +91,13 @@ public:
     virtual void Undo();
     virtual void Redo();
 
-    virtual ZepWindow* GetCurrentWindow() const;
+    [[nodiscard]] virtual auto GetCurrentWindow() const -> ZepWindow*;
     virtual void PreDisplay(){};
 
-    virtual NVec2i GetVisualRange() const;
+    [[nodiscard]] virtual auto GetVisualRange() const -> NVec2i;
 
-    virtual bool HandleGlobalCtrlCommand(const std::string& cmd, uint32_t modifiers, bool& needMoreChars);
-    virtual bool HandleGlobalCommand(const std::string& cmd, uint32_t modifiers, bool& needMoreChars);
+    virtual auto HandleGlobalCtrlCommand(const std::string& cmd, uint32_t modifiers, bool& needMoreChars) -> bool;
+    virtual auto HandleGlobalCommand(const std::string& cmd, uint32_t modifiers, bool& needMoreChars) -> bool;
 
 protected:
     std::stack<std::shared_ptr<ZepCommand>> m_undoStack;

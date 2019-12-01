@@ -19,13 +19,13 @@ struct timer
 };
 extern timer globalTimer;
 
-uint64_t timer_get_time_now();
+auto timer_get_time_now() -> uint64_t;
 void timer_restart(timer& timer);
 void timer_start(timer& timer);
-uint64_t timer_get_elapsed(const timer& timer);
-double timer_get_elapsed_seconds(const timer& timer);
-double timer_to_seconds(uint64_t value);
-double timer_to_ms(uint64_t value);
+auto timer_get_elapsed(const timer& timer) -> uint64_t;
+auto timer_get_elapsed_seconds(const timer& timer) -> double;
+auto timer_to_seconds(uint64_t value) -> double;
+auto timer_to_ms(uint64_t value) -> double;
 
 struct profile_value
 {
@@ -49,7 +49,7 @@ public:
     timer blockTimer;
     uint64_t elapsed = 0;
 
-    ProfileBlock(const char* timer);
+    explicit ProfileBlock(const char* timer);
     ~ProfileBlock();
 };
 

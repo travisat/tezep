@@ -1,8 +1,8 @@
-#include "zep/mode_standard.h"
-#include "zep/commands.h"
-#include "zep/window.h"
+#include "zep/mode_standard.hpp"
+#include "zep/commands.hpp"
+#include "zep/window.hpp"
 
-#include "zep/mcommon/string/stringutils.h"
+#include "zep/mcommon/string/stringutils.hpp"
 
 // Note:
 // This is a version of the buffer that behaves like notepad.
@@ -31,9 +31,7 @@ ZepMode_Standard::ZepMode_Standard(ZepEditor& editor)
 {
 }
 
-ZepMode_Standard::~ZepMode_Standard()
-{
-}
+ZepMode_Standard::~ZepMode_Standard() = default;
 
 void ZepMode_Standard::Begin()
 {
@@ -41,7 +39,7 @@ void ZepMode_Standard::Begin()
     SwitchMode(EditorMode::Insert);
 }
 
-bool ZepMode_Standard::SwitchMode(EditorMode mode)
+auto ZepMode_Standard::SwitchMode(EditorMode mode) -> bool
 {
     assert(mode == EditorMode::Insert || mode == EditorMode::Visual);
     if (mode == m_currentMode)
@@ -51,7 +49,7 @@ bool ZepMode_Standard::SwitchMode(EditorMode mode)
 
     m_currentMode = mode;
 
-    if (GetCurrentWindow())
+    if (GetCurrentWindow() != nullptr)
     {
         // Cursor is always in insert mode for standard
         GetCurrentWindow()->SetCursorType(CursorType::Insert);
@@ -80,7 +78,7 @@ void ZepMode_Standard::AddKeyPress(uint32_t key, uint32_t modifierKeys)
     auto& buffer = GetCurrentWindow()->GetBuffer();
     BufferLocation bufferCursor = GetCurrentWindow()->GetBufferCursor();
     BufferLocation startOffset = bufferCursor;
-    BufferLocation endOffset = buffer.LocationFromOffsetByChars(bufferCursor, long(ch.length()));
+    BufferLocation endOffset = buffer.LocationFromOffsetByChars(bufferCursor, ch.length());
 
     enum class CommandOperation
     {
@@ -112,34 +110,34 @@ void ZepMode_Standard::AddKeyPress(uint32_t key, uint32_t modifierKeys)
     bool return_to_insert = false;
     switch (key)
     {
-        case ExtKeys::DOWN:
-        case ExtKeys::UP:
-        case ExtKeys::LEFT:
-        case ExtKeys::RIGHT:
-        case ExtKeys::END:
-        case ExtKeys::HOME:
-        case ExtKeys::PAGEDOWN:
-        case ExtKeys::PAGEUP:
-            if (modifierKeys & ModifierKey::Shift)
-            {
-                begin_shift = SwitchMode(EditorMode::Visual);
-            }
-            else
-            {
-                // Immediate switch back to insert
-                SwitchMode(EditorMode::Insert);
-            }
-            break;
-        default:
-            return_to_insert = true;
-            break;
+    case ExtKeys::DOWN:
+    case ExtKeys::UP:
+    case ExtKeys::LEFT:
+    case ExtKeys::RIGHT:
+    case ExtKeys::END:
+    case ExtKeys::HOME:
+    case ExtKeys::PAGEDOWN:
+    case ExtKeys::PAGEUP:
+        if ((modifierKeys & ModifierKey::Shift) != 0)
+        {
+            begin_shift = SwitchMode(EditorMode::Visual);
+        }
+        else
+        {
+            // Immediate switch back to insert
+            SwitchMode(EditorMode::Insert);
+        }
+        break;
+    default:
+        return_to_insert = true;
+        break;
     }
 
     // CTRL + ...
-    if (modifierKeys & ModifierKey::Ctrl)
+    if ((modifierKeys & ModifierKey::Ctrl) != 0)
     {
         // CTRL + keys common to modes
-        bool needMoreChars = false; // TODO in standard mode!
+        bool needMoreChars = false; // TODO(unknown): in standard mode!
         keyCache += (const char)key;
         if (HandleGlobalCtrlCommand(keyCache, modifierKeys, needMoreChars))
         {
@@ -150,7 +148,7 @@ void ZepMode_Standard::AddKeyPress(uint32_t key, uint32_t modifierKeys)
             return;
         }
         keyCache.clear();
-       
+
         // Undo
         if (key == 'z')
         {
@@ -158,13 +156,13 @@ void ZepMode_Standard::AddKeyPress(uint32_t key, uint32_t modifierKeys)
             return;
         }
         // Redo
-        else if (key == 'y')
+        if (key == 'y')
         {
             Redo();
             return;
         }
         // Motions fall through to selection code
-        else if (key == ExtKeys::RIGHT)
+        if (key == ExtKeys::RIGHT)
         {
             auto target = buffer.StandardCtrlMotion(bufferCursor, SearchDirection::Forward);
             GetCurrentWindow()->SetBufferCursor(target.second);
@@ -177,7 +175,7 @@ void ZepMode_Standard::AddKeyPress(uint32_t key, uint32_t modifierKeys)
         else if (key == ExtKeys::HOME)
         {
             // CTRL HOME = top of file
-            GetCurrentWindow()->SetBufferCursor(BufferLocation{0});
+            GetCurrentWindow()->SetBufferCursor(BufferLocation{ 0 });
         }
         else if (key == ExtKeys::END)
         {
@@ -323,22 +321,11 @@ void ZepMode_Standard::AddKeyPress(uint32_t key, uint32_t modifierKeys)
     {
         if (begin_shift)
         {
-            if (GetCurrentWindow()->GetBufferCursor() <= startOffset)
-            {
-                m_visualBegin = startOffset; // buffer.LocationFromOffsetByChars(startOffset, -1);
-            }
-            else
-            {
-                m_visualBegin = startOffset;
-            }
+            m_visualBegin = startOffset;
         }
         if (GetCurrentWindow()->GetBufferCursor() > m_visualBegin)
         {
             m_visualEnd = GetCurrentWindow()->GetBufferCursor();
-        }
-        else
-        {
-            m_visualEnd = GetCurrentWindow()->GetBufferCursor(); // buffer.LocationFromOffsetByChars(GetCurrentWindow()->GetBufferCursor(), -1);
         }
     }
 
@@ -404,7 +391,7 @@ void ZepMode_Standard::AddKeyPress(uint32_t key, uint32_t modifierKeys)
 
     if (m_currentMode == EditorMode::Visual)
     {
-        buffer.SetSelection(BufferRange{m_visualBegin, m_visualEnd});
+        buffer.SetSelection(BufferRange{ m_visualBegin, m_visualEnd });
     }
 }
 

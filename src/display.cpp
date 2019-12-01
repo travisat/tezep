@@ -1,7 +1,7 @@
-#include "zep/display.h"
+#include "zep/display.hpp"
 
-#include "zep/mcommon/logger.h"
-#include "zep/mcommon/string/stringutils.h"
+#include "zep/mcommon/logger.hpp"
+#include "zep/mcommon/string/stringutils.hpp"
 
 // A 'window' is like a vim window; i.e. a region inside a tab
 namespace Zep
@@ -24,7 +24,7 @@ void ZepDisplay::BuildCharCache()
     m_charCacheDirty = false;
 }
 
-const NVec2f& ZepDisplay::GetDefaultCharSize()
+auto ZepDisplay::GetDefaultCharSize() -> const NVec2f&
 {
     if (m_charCacheDirty)
     {
@@ -33,7 +33,7 @@ const NVec2f& ZepDisplay::GetDefaultCharSize()
     return m_defaultCharSize;
 }
 
-NVec2f ZepDisplay::GetCharSize(const utf8* pCh)
+auto ZepDisplay::GetCharSize(const utf8* pCh) -> NVec2f
 {
     if (m_charCacheDirty)
     {
@@ -42,4 +42,4 @@ NVec2f ZepDisplay::GetCharSize(const utf8* pCh)
     return m_charCache[*pCh];
 }
 
-}
+} // namespace Zep

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "buffer.h"
+#include "zep/buffer.hpp"
 #include <deque>
 
 namespace Zep
@@ -23,16 +23,16 @@ enum class WindowMotion
 class ZepTabWindow : public ZepComponent
 {
 public:
-    ZepTabWindow(ZepEditor& editor);
-    virtual ~ZepTabWindow();
+    explicit ZepTabWindow(ZepEditor& editor);
+    ~ZepTabWindow() override;
 
-    virtual void Notify(std::shared_ptr<ZepMessage> message) override;
+    void Notify(std::shared_ptr<ZepMessage> message) override;
 
-    ZepWindow* DoMotion(WindowMotion motion);
-    ZepWindow* AddWindow(ZepBuffer* pBuffer, ZepWindow* pParent, bool vsplit);
+    auto DoMotion(WindowMotion motion) -> ZepWindow*;
+    auto AddWindow(ZepBuffer* pBuffer, ZepWindow* pParent, bool vsplit) -> ZepWindow*;
     void RemoveWindow(ZepWindow* pWindow);
     void SetActiveWindow(ZepWindow* pBuffer);
-    ZepWindow* GetActiveWindow() const
+    [[nodiscard]] auto GetActiveWindow() const -> ZepWindow*
     {
         return m_pActiveWindow;
     }
@@ -40,7 +40,7 @@ public:
 
     using tWindows = std::vector<ZepWindow*>;
     using tWindowRegions = std::map<ZepWindow*, std::shared_ptr<Region>>;
-    const tWindows& GetWindows() const
+    [[nodiscard]] auto GetWindows() const -> const tWindows&
     {
         return m_windows;
     }
@@ -50,7 +50,7 @@ public:
     void Display();
 
 private:
-    ZepEditor& m_editor;    // Editor that owns this window
+    ZepEditor& m_editor; // Editor that owns this window
     NRectf m_lastRegionRect;
 
     tWindows m_windows;

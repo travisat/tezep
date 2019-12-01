@@ -1,5 +1,5 @@
 #pragma once
-#include "syntax.h"
+#include "zep/syntax.hpp"
 #include <list>
 #include <string>
 #include <unordered_map>
@@ -12,14 +12,14 @@ class ZepSyntaxAdorn_RainbowBrackets : public ZepSyntaxAdorn
 public:
     using TParent = ZepSyntaxAdorn;
     ZepSyntaxAdorn_RainbowBrackets(ZepSyntax& syntax, ZepBuffer& buffer);
-    virtual ~ZepSyntaxAdorn_RainbowBrackets();
+    ~ZepSyntaxAdorn_RainbowBrackets() override;
 
     void Notify(std::shared_ptr<ZepMessage> payload) override;
-    virtual SyntaxData GetSyntaxAt(long offset, bool& found) const override;
+    auto GetSyntaxAt(int32_t offset, bool& found) const -> SyntaxData override;
 
-    virtual void Clear(long start, long end);
-    virtual void Insert(long start, long end);
-    virtual void Update(long start, long end);
+    virtual void Clear(int32_t start, int32_t end);
+    virtual void Insert(int32_t start, int32_t end);
+    virtual void Update(int32_t start, int32_t end);
 
 private:
     void RefreshBrackets();
@@ -33,9 +33,9 @@ private:
 
     struct Bracket
     {
-        int32_t indent;
-        BracketType type;
-        bool is_open;
+        int32_t indent{};
+        BracketType type{};
+        bool is_open{};
         bool valid = true;
     };
     std::map<BufferLocation, Bracket> m_brackets;

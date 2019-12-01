@@ -3,15 +3,16 @@
 #include <cstdint>
 #include <cstdlib>
 #include <regex>
+#include <utility>
 
-#include "zep/buffer.h"
-#include "zep/editor.h"
-#include "zep/filesystem.h"
+#include "zep/buffer.hpp"
+#include "zep/editor.hpp"
+#include "zep/filesystem.hpp"
 
-#include "zep/mcommon/file/path.h"
-#include "zep/mcommon/string/stringutils.h"
+#include "zep/mcommon/file/path.hpp"
+#include "zep/mcommon/string/stringutils.hpp"
 
-#include "zep/mcommon/logger.h"
+#include "zep/mcommon/logger.hpp"
 
 namespace Zep
 {
@@ -21,46 +22,47 @@ namespace
 
 // A VIM-like definition of a word.  Actually, in Vim this can be changed, but this editor
 // assumes a word is alphanumeric or underscore for consistency
-inline bool IsWordChar(const char c)
+inline auto IsWordChar(const char c) -> bool
 {
     auto ch = ToASCII(c);
-    return std::isalnum(ch) || ch == '_';
+    return (std::isalnum(ch) != 0) || ch == '_';
 }
-inline bool IsWordOrSepChar(const char c)
+inline auto IsWordOrSepChar(const char c) -> bool
 {
     auto ch = ToASCII(c);
-    return std::isalnum(ch) || ch == '_' || ch == ' ' || ch == '\n' || ch == 0;
+    return (std::isalnum(ch) != 0) || ch == '_' || ch == ' ' || ch == '\n' || ch == 0;
 }
-inline bool IsWORDChar(const char c)
+inline auto IsWORDChar(const char c) -> bool
 {
     auto ch = ToASCII(c);
-    return std::isgraph(ch);
+    return std::isgraph(ch) != 0;
 }
-inline bool IsWORDOrSepChar(const char c)
+inline auto IsWORDOrSepChar(const char c) -> bool
 {
     auto ch = ToASCII(c);
-    return std::isgraph(ch) || ch == ' ' || ch == '\n' || ch == 0;
+    return (std::isgraph(ch) != 0) || ch == ' ' || ch == '\n' || ch == 0;
 }
-inline bool IsSpace(const char c)
+inline auto IsSpace(const char c) -> bool
 {
     auto ch = ToASCII(c);
     return ch == ' ';
 }
-inline bool IsSpaceOrNewline(const char c)
+inline auto IsSpaceOrNewline(const char c) -> bool
 {
     auto ch = ToASCII(c);
     return ch == ' ' || ch == '\n';
 }
-inline bool IsSpaceOrTerminal(const char c)
+inline auto IsSpaceOrTerminal(const char c) -> bool
 {
     auto ch = ToASCII(c);
     return ch == ' ' || ch == 0 || ch == '\n';
 }
-inline bool IsNewlineOrEnd(const char c)
+/*
+inline auto IsNewlineOrEnd(const char c) -> bool
 {
     auto ch = ToASCII(c);
     return ch == '\n' || ch == 0;
-}
+}*/
 
 using fnMatch = std::function<bool>(const char);
 
@@ -78,55 +80,57 @@ ZepBuffer::ZepBuffer(ZepEditor& editor, const ZepPath& path)
     Load(path);
 }
 
-ZepBuffer::~ZepBuffer()
-{
-}
+ZepBuffer::~ZepBuffer() = default;
 
 void ZepBuffer::Notify(std::shared_ptr<ZepMessage> message)
 {
 }
 
-long ZepBuffer::GetBufferColumn(BufferLocation location) const
+auto ZepBuffer::GetBufferColumn(BufferLocation location) const -> int32_t
 {
     auto lineStart = GetLinePos(location, LineLocation::LineBegin);
     return location - lineStart;
 }
 
-long ZepBuffer::GetBufferLine(BufferLocation location) const
+auto ZepBuffer::GetBufferLine(BufferLocation location) const -> int32_t
 {
     auto itrLine = std::lower_bound(m_lineEnds.begin(), m_lineEnds.end(), location);
     if (itrLine != m_lineEnds.end() && location >= *itrLine)
     {
         itrLine++;
     }
-    long line = long(itrLine - m_lineEnds.begin());
-    line = std::min(std::max(0l, line), long(m_lineEnds.size() - 1));
+    int32_t line = int32_t(itrLine - m_lineEnds.begin());
+    line = std::min(std::max(0, line), int32_t(m_lineEnds.size() - 1));
     return line;
 }
 
-BufferLocation ZepBuffer::LocationFromOffsetByChars(const BufferLocation& location, long offset, LineLocation clampLimit) const
+auto ZepBuffer::LocationFromOffsetByChars(const BufferLocation& location, int32_t offset, LineLocation clampLimit) const -> BufferLocation
 {
     // Walk and find.
-    long dir = offset > 0 ? 1 : -1;
+    int32_t dir = offset > 0 ? 1 : -1;
 
     auto clampLocation = GetLinePos(location, clampLimit);
 
-    // TODO: This can be cleaner(?)
-    long current = location;
-    for (long i = 0; i < std::abs(offset); i++)
+    // TODO(unknown): This can be cleaner(?)
+    int32_t current = location;
+    for (int32_t i = 0; i < std::abs(offset); i++)
     {
         // If walking back, move back before looking at char
         if (dir == -1)
+        {
             current += dir;
+        }
 
-        if (current >= (long)m_gapBuffer.size())
+        if (current >= m_gapBuffer.size())
+        {
             break;
+        }
 
-        current = std::max(0l, current);
+        current = std::max(0, current);
 
         if (m_gapBuffer[current] == '\n')
         {
-            if ((current + dir) >= (long)m_gapBuffer.size())
+            if ((current + dir) >= m_gapBuffer.size())
             {
                 break;
             }
@@ -146,17 +150,17 @@ BufferLocation ZepBuffer::LocationFromOffsetByChars(const BufferLocation& locati
     return LocationFromOffset(current);
 }
 
-BufferLocation ZepBuffer::LocationFromOffset(const BufferLocation& location, long offset) const
+auto ZepBuffer::LocationFromOffset(const BufferLocation& location, int32_t offset) -> BufferLocation
 {
     return LocationFromOffset(location + offset);
 }
 
-BufferLocation ZepBuffer::LocationFromOffset(long offset) const
+auto ZepBuffer::LocationFromOffset(int32_t offset) -> BufferLocation
 {
     return BufferLocation{ offset };
 }
 
-BufferLocation ZepBuffer::Search(const std::string& str, BufferLocation start, SearchDirection dir, BufferLocation end) const
+auto ZepBuffer::Search(const std::string& str, BufferLocation start, SearchDirection dir, BufferLocation end) -> BufferLocation
 {
     (void)end;
     (void)dir;
@@ -165,23 +169,19 @@ BufferLocation ZepBuffer::Search(const std::string& str, BufferLocation start, S
     return BufferLocation{ 0 };
 }
 
-bool ZepBuffer::Valid(BufferLocation location) const
+auto ZepBuffer::Valid(BufferLocation location) const -> bool
 {
-    if (location < 0 || location >= (BufferLocation)m_gapBuffer.size())
-    {
-        return false;
-    }
-    return true;
+    return !(location < 0 || location >= (BufferLocation)m_gapBuffer.size());
 }
 
 // Prepare for a motion
-bool ZepBuffer::MotionBegin(BufferLocation& start) const
+auto ZepBuffer::MotionBegin(BufferLocation& start) const -> bool
 {
     BufferLocation newStart = start;
 
     // Clamp to sensible, begin
     newStart = std::min(newStart, BufferLocation(m_gapBuffer.size() - 1));
-    newStart = std::max(0l, newStart);
+    newStart = std::max(0, newStart);
 
     bool change = newStart != start;
     if (change)
@@ -189,21 +189,27 @@ bool ZepBuffer::MotionBegin(BufferLocation& start) const
         start = newStart;
         return true;
     }
-    return start;
+    return start != 0;
 }
 
-void ZepBuffer::Move(BufferLocation& loc, SearchDirection dir) const
+void ZepBuffer::Move(BufferLocation& loc, SearchDirection dir)
 {
     if (dir == SearchDirection::Backward)
+    {
         loc--;
+    }
     else
+    {
         loc++;
+    }
 }
 
-bool ZepBuffer::Skip(fnMatch IsToken, BufferLocation& start, SearchDirection dir) const
+auto ZepBuffer::Skip(fnMatch IsToken, BufferLocation& start, SearchDirection dir) const -> bool
 {
     if (!Valid(start))
+    {
         return false;
+    }
 
     bool moved = false;
     while (Valid(start) && IsToken(m_gapBuffer[start]))
@@ -214,10 +220,12 @@ bool ZepBuffer::Skip(fnMatch IsToken, BufferLocation& start, SearchDirection dir
     return moved;
 }
 
-bool ZepBuffer::SkipOne(fnMatch IsToken, BufferLocation& start, SearchDirection dir) const
+auto ZepBuffer::SkipOne(fnMatch IsToken, BufferLocation& start, SearchDirection dir) const -> bool
 {
     if (!Valid(start))
+    {
         return false;
+    }
 
     bool moved = false;
     if (Valid(start) && IsToken(m_gapBuffer[start]))
@@ -228,10 +236,12 @@ bool ZepBuffer::SkipOne(fnMatch IsToken, BufferLocation& start, SearchDirection 
     return moved;
 }
 
-bool ZepBuffer::SkipNot(fnMatch IsToken, BufferLocation& start, SearchDirection dir) const
+auto ZepBuffer::SkipNot(fnMatch IsToken, BufferLocation& start, SearchDirection dir) const -> bool
 {
     if (!Valid(start))
+    {
         return false;
+    }
 
     bool moved = false;
     while (Valid(start) && !IsToken(m_gapBuffer[start]))
@@ -244,7 +254,7 @@ bool ZepBuffer::SkipNot(fnMatch IsToken, BufferLocation& start, SearchDirection 
 
 // This is the vim-like 'caw' rule; The motions and behaviour are based on how vim behaves.
 // This is still quite complex behavior for this particular motion.  I'm open to better ways to express it!
-BufferRange ZepBuffer::AWordMotion(BufferLocation start, uint32_t searchType) const
+auto ZepBuffer::AWordMotion(BufferLocation start, uint32_t searchType) const -> BufferRange
 {
     auto IsWord = searchType == SearchType::Word ? IsWordChar : IsWORDChar;
 
@@ -287,7 +297,7 @@ BufferRange ZepBuffer::AWordMotion(BufferLocation start, uint32_t searchType) co
 // Playing around with CTRL+ arrows and shift in an app like notepad will teach you that the rules for how far to jump
 // depend on what you are over, and which direction you are going.....
 // The unit tests are designed to enforce the behavior here
-BufferRange ZepBuffer::StandardCtrlMotion(BufferLocation cursor, SearchDirection searchDir) const
+auto ZepBuffer::StandardCtrlMotion(BufferLocation cursor, SearchDirection searchDir) const -> BufferRange
 {
     MotionBegin(cursor);
 
@@ -329,7 +339,7 @@ BufferRange ZepBuffer::StandardCtrlMotion(BufferLocation cursor, SearchDirection
     return r;
 }
 
-BufferRange ZepBuffer::InnerWordMotion(BufferLocation start, uint32_t searchType) const
+auto ZepBuffer::InnerWordMotion(BufferLocation start, uint32_t searchType) const -> BufferRange
 {
     auto IsWordOrSpace = searchType == SearchType::Word ? IsWordOrSepChar : IsWORDOrSepChar;
     auto IsWord = searchType == SearchType::Word ? IsWordChar : IsWORDChar;
@@ -362,7 +372,7 @@ BufferRange ZepBuffer::InnerWordMotion(BufferLocation start, uint32_t searchType
     return r;
 }
 
-BufferLocation ZepBuffer::Find(BufferLocation start, const utf8* pBegin, const utf8* pEnd) const
+auto ZepBuffer::Find(BufferLocation start, const utf8* pBegin, const utf8* pEnd) const -> BufferLocation
 {
     if (start > EndLocation())
     {
@@ -408,30 +418,18 @@ BufferLocation ZepBuffer::Find(BufferLocation start, const utf8* pBegin, const u
     return InvalidOffset;
 }
 
-BufferLocation ZepBuffer::FindOnLineMotion(BufferLocation start, const utf8* pCh, SearchDirection dir) const
+auto ZepBuffer::FindOnLineMotion(BufferLocation start, const utf8* pCh, SearchDirection dir) const -> BufferLocation
 {
     auto entry = start;
     auto IsMatch = [pCh](const char ch) {
-        if (*pCh == ch)
-            return true;
-        return false;
+        return *pCh == ch;
     };
     auto NotMatchNotEnd = [pCh](const char ch) {
-        if (*pCh != ch && ch != '\n')
-            return true;
-        return false;
+        return *pCh != ch && ch != '\n';
     };
 
-    if (dir == SearchDirection::Forward)
-    {
-        SkipOne(IsMatch, start, dir);
-        Skip(NotMatchNotEnd, start, dir);
-    }
-    else
-    {
-        SkipOne(IsMatch, start, dir);
-        Skip(NotMatchNotEnd, start, dir);
-    }
+    SkipOne(IsMatch, start, dir);
+    Skip(NotMatchNotEnd, start, dir);
 
     if (Valid(start) && *pCh == m_gapBuffer[start])
     {
@@ -440,7 +438,7 @@ BufferLocation ZepBuffer::FindOnLineMotion(BufferLocation start, const utf8* pCh
     return entry;
 }
 
-BufferLocation ZepBuffer::WordMotion(BufferLocation start, uint32_t searchType, SearchDirection dir) const
+auto ZepBuffer::WordMotion(BufferLocation start, uint32_t searchType, SearchDirection dir) const -> BufferLocation
 {
     auto IsWord = searchType == SearchType::Word ? IsWordChar : IsWORDChar;
 
@@ -489,7 +487,7 @@ BufferLocation ZepBuffer::WordMotion(BufferLocation start, uint32_t searchType, 
     return start;
 }
 
-BufferLocation ZepBuffer::EndWordMotion(BufferLocation start, uint32_t searchType, SearchDirection dir) const
+auto ZepBuffer::EndWordMotion(BufferLocation start, uint32_t searchType, SearchDirection dir) const -> BufferLocation
 {
     auto IsWord = searchType == SearchType::Word ? IsWordChar : IsWORDChar;
 
@@ -539,7 +537,7 @@ BufferLocation ZepBuffer::EndWordMotion(BufferLocation start, uint32_t searchTyp
     return start;
 }
 
-BufferLocation ZepBuffer::ChangeWordMotion(BufferLocation start, uint32_t searchType, SearchDirection dir) const
+auto ZepBuffer::ChangeWordMotion(BufferLocation start, uint32_t searchType, SearchDirection dir) const -> BufferLocation
 {
     // Change word is different to work skipping; it will change a string of spaces, for example.
     // Essentially it changes 'what you are over', based on the word rule
@@ -553,23 +551,19 @@ BufferLocation ZepBuffer::ChangeWordMotion(BufferLocation start, uint32_t search
     return start;
 }
 
-bool ZepBuffer::InsideBuffer(BufferLocation loc) const
+auto ZepBuffer::InsideBuffer(BufferLocation loc) const -> bool
 {
-    if (loc >= 0 && loc < BufferLocation(m_gapBuffer.size()))
-    {
-        return true;
-    }
-    return false;
+    return loc >= 0 && loc < BufferLocation(m_gapBuffer.size());
 }
 
-BufferLocation ZepBuffer::Clamp(BufferLocation in) const
+auto ZepBuffer::Clamp(BufferLocation in) const -> BufferLocation
 {
     in = std::min(in, BufferLocation(m_gapBuffer.size() - 1));
     in = std::max(in, BufferLocation(0));
     return in;
 }
 
-BufferLocation ZepBuffer::ClampToVisibleLine(BufferLocation in) const
+auto ZepBuffer::ClampToVisibleLine(BufferLocation in) const -> BufferLocation
 {
     in = Clamp(in);
     auto loc = GetLinePos(in, LineLocation::LineLastNonCR);
@@ -578,10 +572,10 @@ BufferLocation ZepBuffer::ClampToVisibleLine(BufferLocation in) const
 }
 
 // Method for querying the beginning and end of a line
-bool ZepBuffer::GetLineOffsets(const long line, long& lineStart, long& lineEnd) const
+auto ZepBuffer::GetLineOffsets(const int32_t line, int32_t& lineStart, int32_t& lineEnd) const -> bool
 {
     // Not valid
-    if ((long)m_lineEnds.size() <= line)
+    if (m_lineEnds.size() <= line)
     {
         lineStart = 0;
         lineEnd = 0;
@@ -629,7 +623,7 @@ void ZepBuffer::Load(const ZepPath& path)
     }
 }
 
-bool ZepBuffer::Save(int64_t& size)
+auto ZepBuffer::Save(int64_t& size) -> bool
 {
     if (TestFlags(FileFlags::Locked))
     {
@@ -648,15 +642,15 @@ bool ZepBuffer::Save(int64_t& size)
     // It replaces the /r on files that had it afterwards
     // Alternatively we could manage them 'in place', but that would make parsing more complex.
     // And then what do you do if there are 2 different styles in the file.
-    if (m_fileFlags & FileFlags::StrippedCR)
+    if ((m_fileFlags & FileFlags::StrippedCR) != 0)
     {
-        // TODO: faster way to replace newlines
+        // TODO(unknown): faster way to replace newlines
         string_replace_in_place(str, "\n", "\r\n");
     }
 
     // Remove the appended 0 if necessary
     size = (int64_t)str.size();
-    if (m_fileFlags & FileFlags::TerminatedWithZero)
+    if ((m_fileFlags & FileFlags::TerminatedWithZero) != 0)
     {
         size--;
     }
@@ -674,7 +668,7 @@ bool ZepBuffer::Save(int64_t& size)
     return false;
 }
 
-std::string ZepBuffer::GetDisplayName() const
+auto ZepBuffer::GetDisplayName() const -> std::string
 {
     if (m_filePath.empty())
     {
@@ -683,7 +677,7 @@ std::string ZepBuffer::GetDisplayName() const
     return m_filePath.string();
 }
 
-ZepPath ZepBuffer::GetFilePath() const
+auto ZepBuffer::GetFilePath() const -> ZepPath
 {
     return m_filePath;
 }
@@ -730,7 +724,7 @@ void ZepBuffer::Clear()
     m_lineEnds.clear();
     SetFlags(FileFlags::TerminatedWithZero);
 
-    m_lineEnds.push_back(long(m_gapBuffer.size()));
+    m_lineEnds.push_back(m_gapBuffer.size());
 
     if (changed)
     {
@@ -775,7 +769,7 @@ void ZepBuffer::SetText(const std::string& text, bool initFromFile)
                 input.push_back(ch);
                 if (ch == '\n')
                 {
-                    m_lineEnds.push_back(long(input.size()));
+                    m_lineEnds.push_back(input.size());
                 }
             }
         }
@@ -788,30 +782,30 @@ void ZepBuffer::SetText(const std::string& text, bool initFromFile)
         m_gapBuffer.push_back(0);
     }
 
-    // TODO: Why is a line end needed always?
-    m_lineEnds.push_back(long(m_gapBuffer.size()));
+    // TODO(unknown): Why is a line end needed always?
+    m_lineEnds.push_back(m_gapBuffer.size());
 
     MarkUpdate();
 
     // When loading a file, send the Loaded message to distinguish it from adding to a buffer, and remember that the buffer is not dirty in this case
     if (initFromFile)
     {
-        GetEditor().Broadcast(std::make_shared<BufferMessage>(this, BufferMessageType::Loaded, BufferLocation{ 0 }, BufferLocation{ long(m_gapBuffer.size()) }));
+        GetEditor().Broadcast(std::make_shared<BufferMessage>(this, BufferMessageType::Loaded, BufferLocation{ 0 }, BufferLocation{ static_cast<BufferLocation>(m_gapBuffer.size()) }));
 
         // Doc is not dirty
         ClearFlags(FileFlags::Dirty);
     }
     else
     {
-        GetEditor().Broadcast(std::make_shared<BufferMessage>(this, BufferMessageType::TextAdded, BufferLocation{ 0 }, BufferLocation{ long(m_gapBuffer.size()) }));
+        GetEditor().Broadcast(std::make_shared<BufferMessage>(this, BufferMessageType::TextAdded, BufferLocation{ 0 }, BufferLocation{ static_cast<BufferLocation>(m_gapBuffer.size()) }));
     }
 }
 
-// TODO: This can be cleaner
+// TODO(unknown): This can be cleaner
 // The function needs to find the point on the line which bufferLocation is on.
 // It needs to account for empty lines or the last line, zero terminated.
 // It shouldn't walk away to another line!
-BufferLocation ZepBuffer::GetLinePos(BufferLocation bufferLocation, LineLocation lineLocation) const
+auto ZepBuffer::GetLinePos(BufferLocation bufferLocation, LineLocation lineLocation) const -> BufferLocation
 {
     if (lineLocation == LineLocation::None)
     {
@@ -820,7 +814,9 @@ BufferLocation ZepBuffer::GetLinePos(BufferLocation bufferLocation, LineLocation
 
     bufferLocation = Clamp(bufferLocation);
     if (m_gapBuffer.empty())
+    {
         return bufferLocation;
+    }
 
     // If we are on the CR, move back 1, unless the \n is all that is on the line
     if (m_gapBuffer[bufferLocation] == '\n')
@@ -840,16 +836,14 @@ BufferLocation ZepBuffer::GetLinePos(BufferLocation bufferLocation, LineLocation
     switch (lineLocation)
     {
     default:
-    case LineLocation::LineBegin:
-    {
+    case LineLocation::LineBegin: {
         return Clamp(bufferLocation);
     }
     break;
 
     // The point just after the line end
-    case LineLocation::BeyondLineEnd:
-    {
-        while (bufferLocation < (long)m_gapBuffer.size() && m_gapBuffer[bufferLocation] != '\n' && m_gapBuffer[bufferLocation] != 0)
+    case LineLocation::BeyondLineEnd: {
+        while (bufferLocation < m_gapBuffer.size() && m_gapBuffer[bufferLocation] != '\n' && m_gapBuffer[bufferLocation] != 0)
         {
             bufferLocation++;
         }
@@ -858,9 +852,8 @@ BufferLocation ZepBuffer::GetLinePos(BufferLocation bufferLocation, LineLocation
     }
     break;
 
-    case LineLocation::LineCRBegin:
-    {
-        while (bufferLocation < (long)m_gapBuffer.size()
+    case LineLocation::LineCRBegin: {
+        while (bufferLocation < m_gapBuffer.size()
             && m_gapBuffer[bufferLocation] != '\n'
             && m_gapBuffer[bufferLocation] != 0)
         {
@@ -870,9 +863,8 @@ BufferLocation ZepBuffer::GetLinePos(BufferLocation bufferLocation, LineLocation
     }
     break;
 
-    case LineLocation::LineFirstGraphChar:
-    {
-        while (bufferLocation < (long)m_gapBuffer.size() && !std::isgraph(ToASCII(m_gapBuffer[bufferLocation])) && m_gapBuffer[bufferLocation] != '\n')
+    case LineLocation::LineFirstGraphChar: {
+        while (bufferLocation < m_gapBuffer.size() && (std::isgraph(ToASCII(m_gapBuffer[bufferLocation])) == 0) && m_gapBuffer[bufferLocation] != '\n')
         {
             bufferLocation++;
         }
@@ -880,11 +872,10 @@ BufferLocation ZepBuffer::GetLinePos(BufferLocation bufferLocation, LineLocation
     }
     break;
 
-    case LineLocation::LineLastNonCR:
-    {
+    case LineLocation::LineLastNonCR: {
         auto start = bufferLocation;
 
-        while (bufferLocation < (long)m_gapBuffer.size()
+        while (bufferLocation < m_gapBuffer.size()
             && m_gapBuffer[bufferLocation] != '\n'
             && m_gapBuffer[bufferLocation] != 0)
         {
@@ -900,16 +891,15 @@ BufferLocation ZepBuffer::GetLinePos(BufferLocation bufferLocation, LineLocation
     }
     break;
 
-    case LineLocation::LineLastGraphChar:
-    {
-        while (bufferLocation < (long)m_gapBuffer.size()
+    case LineLocation::LineLastGraphChar: {
+        while (bufferLocation < m_gapBuffer.size()
             && m_gapBuffer[bufferLocation] != '\n'
             && m_gapBuffer[bufferLocation] != 0)
         {
             bufferLocation++;
         }
 
-        while (bufferLocation > 0 && bufferLocation < (long)m_gapBuffer.size() && !std::isgraph(ToASCII(m_gapBuffer[bufferLocation])))
+        while (bufferLocation > 0 && bufferLocation < m_gapBuffer.size() && (std::isgraph(ToASCII(m_gapBuffer[bufferLocation])) == 0))
         {
             bufferLocation--;
         }
@@ -927,7 +917,7 @@ void ZepBuffer::UpdateForDelete(const BufferLocation& startOffset, const BufferL
         {
             return true;
         }
-        else if (endOffset <= marker->range.first)
+        if (endOffset <= marker->range.first)
         {
             marker->range.first -= distance;
             marker->range.second -= distance;
@@ -944,7 +934,7 @@ void ZepBuffer::UpdateForDelete(const BufferLocation& startOffset, const BufferL
 
     if (!m_lineWidgets.empty())
     {
-        std::map<long, long> lineMoves;
+        std::map<int32_t, int32_t> lineMoves;
         auto itr = m_lineWidgets.begin();
         while (itr != m_lineWidgets.end())
         {
@@ -954,7 +944,7 @@ void ZepBuffer::UpdateForDelete(const BufferLocation& startOffset, const BufferL
                 // Nothing to do, the widgets are behind the area removed
                 break;
             }
-            else if (startOffset < itr->first)
+            if (startOffset < itr->first)
             {
                 // Removed before, jump back by this many
                 lineMoves[itr->first] = itr->first - distance;
@@ -1004,7 +994,7 @@ void ZepBuffer::UpdateForInsert(const BufferLocation& startOffset, const BufferL
 
     if (!m_lineWidgets.empty())
     {
-        std::map<long, long> lineMoves;
+        std::map<int32_t, int32_t> lineMoves;
         auto itr = m_lineWidgets.begin();
         while (itr != m_lineWidgets.end())
         {
@@ -1014,7 +1004,7 @@ void ZepBuffer::UpdateForInsert(const BufferLocation& startOffset, const BufferL
                 // Nothing to do, the widgets are behind the area inserted
                 break;
             }
-            else if (startOffset <= itr->first)
+            if (startOffset <= itr->first)
             {
                 // Add
                 lineMoves[itr->first] = itr->first + distance;
@@ -1034,14 +1024,14 @@ void ZepBuffer::UpdateForInsert(const BufferLocation& startOffset, const BufferL
     }
 }
 
-bool ZepBuffer::Insert(const BufferLocation& startOffset, const std::string& str)
+auto ZepBuffer::Insert(const BufferLocation& startOffset, const std::string& str) -> bool
 {
-    if (startOffset > (long)m_gapBuffer.size())
+    if (startOffset > m_gapBuffer.size())
     {
         return false;
     }
 
-    BufferLocation changeRange{ long(str.length()) };
+    BufferLocation changeRange{ static_cast<BufferLocation>(str.length()) };
 
     // We are about to modify this range
     GetEditor().Broadcast(std::make_shared<BufferMessage>(this, BufferMessageType::PreBufferChange, startOffset, startOffset + changeRange));
@@ -1061,7 +1051,7 @@ bool ZepBuffer::Insert(const BufferLocation& startOffset, const std::string& str
     auto itr = str.begin();
 
     // Make a list of lines to 'insert'
-    std::vector<long> lines;
+    std::vector<int32_t> lines;
     std::string lineEndSymbols("\n");
     while (itr != itrEnd)
     {
@@ -1074,7 +1064,7 @@ bool ZepBuffer::Insert(const BufferLocation& startOffset, const std::string& str
             {
                 itr++;
             }
-            lines.push_back(long(itr - itrBegin) + startOffset);
+            lines.push_back((itr - itrBegin) + startOffset);
         }
     }
 
@@ -1083,7 +1073,7 @@ bool ZepBuffer::Insert(const BufferLocation& startOffset, const std::string& str
     auto itrAdd = itrLine;
     while (itrAdd != m_lineEnds.end())
     {
-        *itrAdd += long(str.length());
+        *itrAdd += str.length();
         itrAdd++;
     }
 
@@ -1103,9 +1093,9 @@ bool ZepBuffer::Insert(const BufferLocation& startOffset, const std::string& str
     return true;
 }
 
-bool ZepBuffer::Replace(const BufferLocation& startOffset, const BufferLocation& endOffset, const std::string& str)
+auto ZepBuffer::Replace(const BufferLocation& startOffset, const BufferLocation& endOffset, const std::string& str) -> bool
 {
-    if (startOffset > (long)m_gapBuffer.size() || endOffset > (long)m_gapBuffer.size())
+    if (startOffset > m_gapBuffer.size() || endOffset > m_gapBuffer.size())
     {
         return false;
     }
@@ -1136,7 +1126,7 @@ bool ZepBuffer::Replace(const BufferLocation& startOffset, const BufferLocation&
 // This helps them to fix up their data structures without rebuilding.
 // Assumption: The buffer always is at least a single line/character of '0', representing file end.
 // This makes a few things fall out more easily
-bool ZepBuffer::Delete(const BufferLocation& startOffset, const BufferLocation& endOffset)
+auto ZepBuffer::Delete(const BufferLocation& startOffset, const BufferLocation& endOffset) -> bool
 {
     assert(startOffset >= 0 && endOffset <= (BufferLocation)(m_gapBuffer.size() - 1));
 
@@ -1181,15 +1171,15 @@ bool ZepBuffer::Delete(const BufferLocation& startOffset, const BufferLocation& 
     return true;
 }
 
-BufferLocation ZepBuffer::EndLocation() const
+auto ZepBuffer::EndLocation() const -> BufferLocation
 {
-    // TODO: This isn't safe? What if the buffer is empty
+    // TODO(unknown): This isn't safe? What if the buffer is empty
     // I've clamped it for now
     auto end = std::max((BufferLocation)0, (BufferLocation)m_gapBuffer.size() - 1);
     return LocationFromOffset(end);
 }
 
-ZepTheme& ZepBuffer::GetTheme() const
+auto ZepBuffer::GetTheme() const -> ZepTheme&
 {
     if (m_spOverrideTheme)
     {
@@ -1200,10 +1190,10 @@ ZepTheme& ZepBuffer::GetTheme() const
 
 void ZepBuffer::SetTheme(std::shared_ptr<ZepTheme> spTheme)
 {
-    m_spOverrideTheme = spTheme;
+    m_spOverrideTheme = std::move(spTheme);
 }
 
-bool ZepBuffer::HasSelection() const
+auto ZepBuffer::HasSelection() const -> bool
 {
     return m_selection.first != m_selection.second;
 }
@@ -1213,7 +1203,7 @@ void ZepBuffer::ClearSelection()
     m_selection.first = m_selection.second = 0;
 }
 
-BufferRange ZepBuffer::GetSelection() const
+auto ZepBuffer::GetSelection() const -> BufferRange
 {
     return m_selection;
 }
@@ -1227,13 +1217,13 @@ void ZepBuffer::SetSelection(const BufferRange& selection)
     }
 }
 
-void ZepBuffer::AddRangeMarker(std::shared_ptr<RangeMarker> spMarker)
+void ZepBuffer::AddRangeMarker(const std::shared_ptr<RangeMarker>& spMarker)
 {
     m_rangeMarkers[spMarker->range.first].insert(spMarker);
     GetEditor().Broadcast(std::make_shared<BufferMessage>(this, BufferMessageType::MarkersChanged, 0, BufferLocation(m_gapBuffer.size() - 1)));
 }
 
-void ZepBuffer::ClearRangeMarker(std::shared_ptr<RangeMarker> spMarker)
+void ZepBuffer::ClearRangeMarker(const std::shared_ptr<RangeMarker>& spMarker)
 {
     std::set<BufferLocation> emptyLocations;
     for (auto& markerPair : m_rangeMarkers)
@@ -1280,7 +1270,9 @@ void ZepBuffer::ForEachMarker(uint32_t markerType, SearchDirection dir, BufferLo
 {
     auto itrStart = m_rangeMarkers.lower_bound(begin);
     if (itrStart == m_rangeMarkers.end())
+    {
         return;
+    }
 
     auto itrEnd = m_rangeMarkers.upper_bound(end);
 
@@ -1306,7 +1298,7 @@ void ZepBuffer::ForEachMarker(uint32_t markerType, SearchDirection dir, BufferLo
     {
         auto itrREnd = std::make_reverse_iterator(itrStart);
         auto itrRStart = std::make_reverse_iterator(itrEnd);
-         
+
         for (auto itr = itrRStart; itr != itrREnd; itr++)
         {
             for (auto& markerItem : itr->second)
@@ -1346,7 +1338,7 @@ void ZepBuffer::ShowMarkers(uint32_t markerType, uint32_t displayType)
     });
 }
 
-tRangeMarkers ZepBuffer::GetRangeMarkers(uint32_t markerType) const
+auto ZepBuffer::GetRangeMarkers(uint32_t markerType) const -> tRangeMarkers
 {
     tRangeMarkers markers;
     ForEachMarker(markerType, SearchDirection::Forward, 0, EndLocation(), [&](const std::shared_ptr<RangeMarker>& spMarker) {
@@ -1359,9 +1351,9 @@ tRangeMarkers ZepBuffer::GetRangeMarkers(uint32_t markerType) const
     return markers;
 }
 
-std::shared_ptr<RangeMarker> ZepBuffer::FindNextMarker(BufferLocation start, SearchDirection dir, uint32_t markerType)
+auto ZepBuffer::FindNextMarker(BufferLocation start, SearchDirection dir, uint32_t markerType) -> std::shared_ptr<RangeMarker>
 {
-    start = std::max(0l, start);
+    start = std::max(0, start);
 
     std::shared_ptr<RangeMarker> spFound;
     auto search = [&]() {
@@ -1401,7 +1393,7 @@ void ZepBuffer::SetBufferType(BufferType type)
     m_bufferType = type;
 }
 
-BufferType ZepBuffer::GetBufferType() const
+auto ZepBuffer::GetBufferType() const -> BufferType
 {
     return m_bufferType;
 }
@@ -1411,12 +1403,12 @@ void ZepBuffer::SetLastEditLocation(BufferLocation loc)
     m_lastEditLocation = loc;
 }
 
-BufferLocation ZepBuffer::GetLastEditLocation() const
+auto ZepBuffer::GetLastEditLocation() const -> BufferLocation
 {
     return m_lastEditLocation;
 }
 
-ZepMode* ZepBuffer::GetMode() const
+auto ZepBuffer::GetMode() const -> ZepMode*
 {
     if (m_spMode)
     {
@@ -1430,21 +1422,23 @@ void ZepBuffer::SetMode(std::shared_ptr<ZepMode> spMode)
     m_spMode = spMode;
 }
 
-void ZepBuffer::AddLineWidget(long line, std::shared_ptr<ILineWidget> spWidget)
+void ZepBuffer::AddLineWidget(int32_t line, std::shared_ptr<ILineWidget> spWidget)
 {
-    // TODO: Add layout changed message
-    long start, end;
+    // TODO(unknown): Add layout changed message
+    int32_t start;
+    int32_t end;
     GetLineOffsets(line, start, end);
 
     m_lineWidgets[start].push_back(spWidget);
     GetEditor().Broadcast(std::make_shared<BufferMessage>(this, BufferMessageType::TextChanged, 0, 0));
 }
 
-void ZepBuffer::ClearLineWidgets(long line)
+void ZepBuffer::ClearLineWidgets(int32_t line)
 {
     if (line != -1)
     {
-        long start, end;
+        int32_t start;
+        int32_t end;
         GetLineOffsets(line, start, end);
         m_lineWidgets.erase(start);
     }
@@ -1455,9 +1449,10 @@ void ZepBuffer::ClearLineWidgets(long line)
     GetEditor().Broadcast(std::make_shared<BufferMessage>(this, BufferMessageType::TextChanged, 0, 0));
 }
 
-const ZepBuffer::tLineWidgets* ZepBuffer::GetLineWidgets(long line) const
+auto ZepBuffer::GetLineWidgets(int32_t line) const -> const ZepBuffer::tLineWidgets*
 {
-    long start, end;
+    int32_t start;
+    int32_t end;
     GetLineOffsets(line, start, end);
 
     auto itrFound = m_lineWidgets.find(start);
@@ -1468,7 +1463,7 @@ const ZepBuffer::tLineWidgets* ZepBuffer::GetLineWidgets(long line) const
     return nullptr;
 }
 
-bool ZepBuffer::IsHidden() const
+auto ZepBuffer::IsHidden() const -> bool
 {
     auto windows = GetEditor().FindBufferWindows(this);
     return windows.empty();

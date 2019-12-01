@@ -1,22 +1,23 @@
 #pragma once
 
-#include "zep/mcommon/string/stringutils.h"
+#include "zep/mcommon/string/stringutils.hpp"
 
 #include <system_error>
 #include <chrono>
 #include <sstream>
 #include <fstream>
+#include <utility>
 
 namespace Zep
 {
 
-typedef std::chrono::system_clock::time_point file_time_type;
+using file_time_type = std::chrono::system_clock::time_point;
 class ZepPath
 {
 public:
-    typedef std::vector<std::string>::const_iterator const_iterator;
-    ZepPath(const std::string& strPath = std::string())
-        : m_strPath(strPath)
+    using const_iterator = std::vector<std::string>::const_iterator;
+    ZepPath(std::string  strPath = std::string())
+        : m_strPath(std::move(strPath))
     {
     }
 
@@ -25,15 +26,15 @@ public:
     {
     }
 
-    bool empty() const
+    auto empty() const -> bool
     {
         return m_strPath.empty();
     }
 
-    ZepPath stem() const
+    auto stem() const -> ZepPath
     {
         auto str = filename().string();
-        size_t dot = str.find_last_of(".");
+        size_t dot = str.find_last_of('.');
         if (dot != std::string::npos)
         {
             return str.substr(0, dot);
@@ -41,9 +42,9 @@ public:
         return str;
     }
 
-    // TODO Unit tests
+    // TODO(unknown): Unit tests
     // (See SO solution for some examples)
-    ZepPath filename() const
+    auto filename() const -> ZepPath
     {
         //https://stackoverflow.com/a/43283887/18942
         if (m_strPath.empty())
@@ -86,28 +87,29 @@ public:
         return m_strPath.substr(index + 1, len - index);
     }
 
-    bool has_filename() const
+    auto has_filename() const -> bool
     {
         return !filename().string().empty();
     }
 
-    bool has_extension() const
+    auto has_extension() const -> bool
     {
         return !extension().string().empty();
     }
 
-    bool is_absolute() const
+    static auto is_absolute() -> bool 
     {
         return false;
     }
 
-    ZepPath extension() const
+    auto extension() const -> ZepPath
     {
-        if (!has_filename())
+        if (!has_filename()) {
             return ZepPath();
+}
 
         auto str = filename().string();
-        size_t dot = str.find_last_of(".");
+        size_t dot = str.find_last_of('.');
         if (dot != std::string::npos)
         {
             return str.substr(dot, str.length() - dot);
@@ -115,7 +117,7 @@ public:
         return ZepPath();
     }
 
-    ZepPath parent_path() const
+    auto parent_path() const -> ZepPath
     {
         std::string strSplit;
         size_t sep = m_strPath.find_last_of("\\/");
@@ -126,9 +128,9 @@ public:
         return ZepPath("");
     }
 
-    ZepPath& replace_extension(const std::string& extension)
+    auto replace_extension(const std::string& extension) -> ZepPath&
     {
-        size_t dot = m_strPath.find_last_of(".");
+        size_t dot = m_strPath.find_last_of('.');
         if (dot != std::string::npos)
         {
             m_strPath = m_strPath.substr(0, dot - 1) + extension;
@@ -140,26 +142,26 @@ public:
         return *this;
     }
 
-    const char* c_str() const
+    auto c_str() const -> const char*
     {
         return m_strPath.c_str();
     }
-    std::string string() const
+    auto string() const -> std::string
     {
         return m_strPath;
     }
 
-    bool operator==(const ZepPath& rhs) const
+    auto operator==(const ZepPath& rhs) const -> bool
     {
         return m_strPath == rhs.string();
     }
     
-    bool operator!=(const ZepPath& rhs) const
+    auto operator!=(const ZepPath& rhs) const -> bool
     {
         return m_strPath != rhs.string();
     }
 
-    ZepPath operator/(const ZepPath& rhs) const
+    auto operator/(const ZepPath& rhs) const -> ZepPath
     {
         std::string temp = m_strPath;
         RTrim(temp, "\\/");
@@ -175,19 +177,19 @@ public:
         return m_strPath;
     }
 
-    bool operator<(const ZepPath& rhs) const
+    auto operator<(const ZepPath& rhs) const -> bool
     {
         return m_strPath < rhs.string();
     }
 
-    std::vector<std::string>::const_iterator begin() const
+    auto begin() const -> std::vector<std::string>::const_iterator
     {
         std::string can = string_replace(m_strPath, "\\", "/");
         m_components = string_split(can, "/");
         return m_components.begin();
     }
 
-    std::vector<std::string>::const_iterator end() const
+    auto end() const -> std::vector<std::string>::const_iterator
     {
         return m_components.end();
     }
@@ -197,7 +199,7 @@ private:
     std::string m_strPath;
 };
 
-ZepPath path_get_relative(const ZepPath& from, const ZepPath& to);
+auto path_get_relative(const ZepPath& from, const ZepPath& to) -> ZepPath;
 
 /*
 inline ZepPath absolute(const ZepPath& input)

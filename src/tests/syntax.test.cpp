@@ -1,9 +1,7 @@
-#include "config_app.h"
-
-#include "zep/buffer.h"
-#include "zep/display.h"
-#include "zep/editor.h"
-#include "zep/syntax.h"
+#include "zep/buffer.hpp"
+#include "zep/display.hpp"
+#include "zep/editor.hpp"
+#include "zep/syntax.hpp"
 
 #include <gtest/gtest.h>
 

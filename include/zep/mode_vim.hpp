@@ -1,7 +1,7 @@
 #pragma once
 
-#include "mode.h"
-#include "zep/commands.h"
+#include "zep/mode.hpp"
+#include "zep/commands.hpp"
 
 class Timer;
 
@@ -26,7 +26,7 @@ enum
     HandledCount = (1 << 2), // Command implements the count, no need to recall it.
     NeedMoreChars
 };
-}
+} // namespace CommandResultFlags
 
 struct VimSettings
 {
@@ -70,13 +70,13 @@ struct CommandContext
 
     const SpanInfo* pLineInfo = nullptr;
     ReplaceRangeMode replaceRangeMode = ReplaceRangeMode::Fill;
-    BufferLocation beginRange{-1};
-    BufferLocation endRange{-1};
+    BufferLocation beginRange{ -1 };
+    BufferLocation endRange{ -1 };
     ZepBuffer& buffer;
 
     // Cursor State
-    BufferLocation bufferCursor{-1};
-    BufferLocation cursorAfterOverride{-1};
+    BufferLocation bufferCursor{ -1 };
+    BufferLocation cursorAfterOverride{ -1 };
 
     // Register state
     std::stack<char> registers;
@@ -98,42 +98,42 @@ struct CommandContext
 class ZepMode_Vim : public ZepMode
 {
 public:
-    ZepMode_Vim(ZepEditor& editor);
-    ~ZepMode_Vim();
+    explicit ZepMode_Vim(ZepEditor& editor);
+    ~ZepMode_Vim() override;
 
-    virtual void AddKeyPress(uint32_t key, uint32_t modifiers = 0) override;
-    virtual void Begin() override;
+    void AddKeyPress(uint32_t key, uint32_t modifiers) override;
+    void Begin() override;
 
-    static const char* StaticName()
+    static auto StaticName() -> const char*
     {
         return "Vim";
     }
-    virtual const char* Name() const override
+    [[nodiscard]] auto Name() const -> const char* override
     {
         return StaticName();
     }
 
-    const std::string& GetLastCommand() const
+    [[nodiscard]] auto GetLastCommand() const -> const std::string&
     {
         return m_lastCommand;
     }
-    int GetLastCount() const
+    [[nodiscard]] auto GetLastCount() const -> int
     {
         return m_lastCount;
     }
 
-    virtual void PreDisplay() override;
+    void PreDisplay() override;
 
 private:
     void ClampCursorForMode();
     void UpdateVisualSelection();
     void HandleInsert(uint32_t key);
-    bool GetOperationRange(const std::string& op, EditorMode mode, BufferLocation& beginRange, BufferLocation& endRange) const;
+    auto GetOperationRange(const std::string& op, EditorMode mode, BufferLocation& beginRange, BufferLocation& endRange) const -> bool;
     void SwitchMode(EditorMode mode);
     void ResetCommand();
     void Init();
-    bool GetCommand(CommandContext& context);
-    bool HandleExCommand(std::string command, const char key);
+    auto GetCommand(CommandContext& context) -> bool;
+    auto HandleExCommand(std::string command, char key) -> bool;
 
     std::string m_currentCommand;
     std::string m_lastCommand;

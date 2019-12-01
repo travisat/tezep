@@ -1,28 +1,28 @@
-#include "zep/line_widgets.h"
-#include "zep/display.h"
+#include "zep/line_widgets.hpp"
+#include "zep/display.hpp"
 
 namespace Zep
 {
 
-NVec2f FloatSlider::GetSize() const
+auto FloatSlider::GetSize() const -> NVec2f
 {
     // Make the slider as high as the font, but return non-dpi scale
-    return NVec2f((60.0f * m_dimension) + (m_sliderGap * (m_dimension - 1)), m_editor.GetDisplay().GetFontHeightPixels() / m_editor.GetPixelScale());
+    return NVec2f((60.0F * m_dimension) + (m_sliderGap * ((float)m_dimension - 1)), m_editor.GetDisplay().GetFontHeightPixels() / m_editor.GetPixelScale());
 }
 
 void FloatSlider::MouseDown(const NVec2f& pos, ZepMouseButton button)
 {
-    (void*)&pos, (void*)&button;
+    (void)&pos, (void)&button;
 }
 
 void FloatSlider::MouseUp(const NVec2f& pos, ZepMouseButton button)
 {
-    (void*)&pos, (void*)&button;
+    (void)&pos, (void)&button;
 }
 
 void FloatSlider::MouseMove(const NVec2f& pos)
 {
-    (void*)&pos;
+    (void)&pos;
 }
 
 void FloatSlider::Draw(const ZepBuffer& buffer, const NVec2f& loc)
@@ -34,10 +34,10 @@ void FloatSlider::Draw(const ZepBuffer& buffer, const NVec2f& loc)
         // Convert to low DPI, then double up on submit
         // We should do it this way more.
         auto location = loc / m_editor.GetPixelScale();
-        location = NVec2f(location.x + (slider * (60.0f + m_sliderGap)), location.y);
+        location = NVec2f(location.x + (slider * (60.0F + m_sliderGap)), location.y);
 
         NVec2f size = GetSize();
-        size.x -= ((m_dimension - 1) * m_sliderGap);
+        size.x -= (((float)m_dimension - 1) * m_sliderGap);
         size.x /= m_dimension;
         auto rc = NRectf(
             NVec2f(location.x, location.y),
@@ -52,7 +52,7 @@ void FloatSlider::Draw(const ZepBuffer& buffer, const NVec2f& loc)
 
         NRectf rcThumb = rcInner;
         rcThumb.Adjust(margin.x, margin.y, -margin.x, -margin.y);
-        rcThumb = NRectf(rcThumb.Left() + 10.0f, rcThumb.Top(), 10.0f, rcThumb.Size().y);
+        rcThumb = NRectf(rcThumb.Left() + 10.0F, rcThumb.Top(), 10.0F, rcThumb.Size().y);
         display.DrawRectFilled(DPI_RECT(rcThumb), buffer.GetTheme().GetColor(ThemeColor::WidgetActive));
     }
 }
@@ -66,7 +66,7 @@ void FloatSlider::Set(const NVec4f& value)
     }
 }
 
-const NVec4f& FloatSlider::Get() const
+auto FloatSlider::Get() const -> const NVec4f&
 {
     return m_value;
 }

@@ -1,7 +1,8 @@
 #pragma once
 
-#include <ostream>
 #include <cmath>
+#include <ostream>
+
 
 // 2D and 4D vectors, used for area and color calculations.
 // Some helpers for color conversion too.
@@ -35,61 +36,61 @@ struct NVec2
     T x;
     T y;
 
-    bool operator==(const NVec2<T>& rhs) const
+    auto operator==(const NVec2<T>& rhs) const -> bool
     {
         if (x == rhs.x && y == rhs.y)
             return true;
         return false;
     }
 
-    bool operator!=(const NVec2<T>& rhs) const
+    auto operator!=(const NVec2<T>& rhs) const -> bool
     {
         return !(*this == rhs);
     }
 };
 template <class T>
-inline NVec2<T> operator+(const NVec2<T>& lhs, const NVec2<T>& rhs)
+inline auto operator+(const NVec2<T>& lhs, const NVec2<T>& rhs) -> NVec2<T>
 {
     return NVec2<T>(lhs.x + rhs.x, lhs.y + rhs.y);
 }
 template <class T>
-inline NVec2<T> operator-(const NVec2<T>& lhs, const NVec2<T>& rhs)
+inline auto operator-(const NVec2<T>& lhs, const NVec2<T>& rhs) -> NVec2<T>
 {
     return NVec2<T>(lhs.x - rhs.x, lhs.y - rhs.y);
 }
 template <class T>
-inline NVec2<T> operator/(const NVec2<T>& lhs, const NVec2<T>& rhs)
+inline auto operator/(const NVec2<T>& lhs, const NVec2<T>& rhs) -> NVec2<T>
 {
     return NVec2<T>(lhs.x / rhs.x, lhs.y / rhs.y);
 }
 template <class T>
-inline NVec2<T>& operator+=(NVec2<T>& lhs, const NVec2<T>& rhs)
+inline auto operator+=(NVec2<T>& lhs, const NVec2<T>& rhs) -> NVec2<T>&
 {
     lhs.x += rhs.x;
     lhs.y += rhs.y;
     return lhs;
 }
 template <class T>
-inline NVec2<T>& operator-=(NVec2<T>& lhs, const NVec2<T>& rhs)
+inline auto operator-=(NVec2<T>& lhs, const NVec2<T>& rhs) -> NVec2<T>&
 {
     lhs.x -= rhs.x;
     lhs.y -= rhs.y;
     return lhs;
 }
 template <class T>
-inline NVec2<T> operator*(const NVec2<T>& lhs, float val)
+inline auto operator*(const NVec2<T>& lhs, float val) -> NVec2<T>
 {
     return NVec2<T>(lhs.x * val, lhs.y * val);
 }
 template <class T>
-inline NVec2<T>& operator*=(NVec2<T>& lhs, float val)
+inline auto operator*=(NVec2<T>& lhs, float val) -> NVec2<T>&
 {
     lhs.x *= val;
     lhs.y *= val;
     return lhs;
 }
 template <class T>
-inline bool operator<(const NVec2<T>& lhs, const NVec2<T>& rhs)
+inline auto operator<(const NVec2<T>& lhs, const NVec2<T>& rhs) -> bool
 {
     if (lhs.x != rhs.x)
     {
@@ -98,25 +99,25 @@ inline bool operator<(const NVec2<T>& lhs, const NVec2<T>& rhs)
     return lhs.y < rhs.y;
 }
 template <class T>
-inline NVec2<T> Clamp(const NVec2<T>& val, const NVec2<T>& min, const NVec2<T>& max)
+inline auto Clamp(const NVec2<T>& val, const NVec2<T>& min, const NVec2<T>& max) -> NVec2<T>
 {
     return NVec2<T>(std::min(max.x, std::max(min.x, val.x)), std::min(max.y, std::max(min.y, val.y)));
 }
 template <class T>
-inline T ManhattanDistance(const NVec2<T>& l, const NVec2<T>& r)
+inline auto ManhattanDistance(const NVec2<T>& l, const NVec2<T>& r) -> T
 {
     return std::abs(l.x - r.x) + std::abs(r.y - l.y);
 }
 
-template<class T>
-std::ostream& operator << (std::ostream& str, const NVec2<T>& v)
+template <class T>
+auto operator<<(std::ostream& str, const NVec2<T>& v) -> std::ostream&
 {
     str << "(" << v.x << ", " << v.y << ")";
     return str;
 }
 
 using NVec2f = NVec2<float>;
-using NVec2i = NVec2<long>;
+using NVec2i = NVec2<int32_t>;
 
 template <class T>
 struct NVec4
@@ -147,30 +148,30 @@ struct NVec4
     T z;
     T w;
 
-    bool operator==(const NVec4<T>& rhs) const
+    auto operator==(const NVec4<T>& rhs) const -> bool
     {
         if (x == rhs.x && y == rhs.y && z == rhs.z && w == rhs.w)
             return true;
         return false;
     }
 
-    bool operator!=(const NVec4<T>& rhs) const
+    auto operator!=(const NVec4<T>& rhs) const -> bool
     {
         return !(*this = rhs);
     }
 };
 template <class T>
-inline NVec4<T> operator+(const NVec4<T>& lhs, const NVec4<T>& rhs)
+inline auto operator+(const NVec4<T>& lhs, const NVec4<T>& rhs) -> NVec4<T>
 {
     return NVec4<T>(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z, lhs.w + rhs.w);
 }
 template <class T>
-inline NVec4<T> operator-(const NVec4<T>& lhs, const NVec4<T>& rhs)
+inline auto operator-(const NVec4<T>& lhs, const NVec4<T>& rhs) -> NVec4<T>
 {
     return NVec4<T>(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z, lhs.w - rhs.w);
 }
 template <class T>
-inline NVec4<T>& operator+=(NVec4<T>& lhs, const NVec4<T>& rhs)
+inline auto operator+=(NVec4<T>& lhs, const NVec4<T>& rhs) -> NVec4<T>&
 {
     lhs.x += rhs.x;
     lhs.y += rhs.y;
@@ -179,7 +180,7 @@ inline NVec4<T>& operator+=(NVec4<T>& lhs, const NVec4<T>& rhs)
     return lhs;
 }
 template <class T>
-inline NVec4<T>& operator-=(NVec4<T>& lhs, const NVec4<T>& rhs)
+inline auto operator-=(NVec4<T>& lhs, const NVec4<T>& rhs) -> NVec4<T>&
 {
     lhs.x -= rhs.x;
     lhs.y -= rhs.y;
@@ -188,12 +189,12 @@ inline NVec4<T>& operator-=(NVec4<T>& lhs, const NVec4<T>& rhs)
     return lhs;
 }
 template <class T>
-inline NVec4<T> operator*(const NVec4<T>& lhs, float val)
+inline auto operator*(const NVec4<T>& lhs, float val) -> NVec4<T>
 {
     return NVec4<T>(lhs.x * val, lhs.y * val, lhs.z * val, lhs.w * val);
 }
 template <class T>
-inline NVec4<T>& operator*=(NVec4<T>& lhs, float val)
+inline auto operator*=(NVec4<T>& lhs, float val) -> NVec4<T>&
 {
     lhs.x *= val;
     lhs.y *= val;
@@ -202,7 +203,7 @@ inline NVec4<T>& operator*=(NVec4<T>& lhs, float val)
     return lhs;
 }
 template <class T>
-inline NVec4<T> Clamp(const NVec4<T>& val, const NVec4<T>& min, const NVec4<T>& max)
+inline auto Clamp(const NVec4<T>& val, const NVec4<T>& min, const NVec4<T>& max) -> NVec4<T>
 {
     return NVec4<T>(std::min(max.x, std::max(min.x, val.x)),
         std::min(max.y, std::max(min.y, val.y)),
@@ -210,54 +211,56 @@ inline NVec4<T> Clamp(const NVec4<T>& val, const NVec4<T>& min, const NVec4<T>& 
         std::min(max.w, std::max(min.w, val.w)));
 }
 
-inline uint32_t ToPacked(const NVec4<float>& val)
+inline auto ToPacked(const NVec4<float>& val) -> uint32_t
 {
     uint32_t col = 0;
-    col |= uint32_t(val.x * 255.0f) << 24;
-    col |= uint32_t(val.y * 255.0f) << 16;
-    col |= uint32_t(val.z * 255.0f) << 8;
-    col |= uint32_t(val.w * 255.0f);
+    col |= uint32_t(val.x * 255.0F) << 24;
+    col |= uint32_t(val.y * 255.0F) << 16;
+    col |= uint32_t(val.z * 255.0F) << 8;
+    col |= uint32_t(val.w * 255.0F);
     return col;
 }
 
-inline uint32_t ToPackedARGB(const NVec4<float>& val)
+inline auto ToPackedARGB(const NVec4<float>& val) -> uint32_t
 {
     uint32_t col = 0;
-    col |= uint32_t(val.w * 255.0f) << 24;
-    col |= uint32_t(val.x * 255.0f) << 16;
-    col |= uint32_t(val.y * 255.0f) << 8;
-    col |= uint32_t(val.z * 255.0f);
+    col |= uint32_t(val.w * 255.0F) << 24;
+    col |= uint32_t(val.x * 255.0F) << 16;
+    col |= uint32_t(val.y * 255.0F) << 8;
+    col |= uint32_t(val.z * 255.0F);
     return col;
 }
 
-inline uint32_t ToPackedABGR(const NVec4<float>& val)
+inline auto ToPackedABGR(const NVec4<float>& val) -> uint32_t
 {
     uint32_t col = 0;
-    col |= uint32_t(val.w * 255.0f) << 24;
-    col |= uint32_t(val.x * 255.0f);
-    col |= uint32_t(val.y * 255.0f) << 8;
-    col |= uint32_t(val.z * 255.0f) << 16;
+    col |= uint32_t(val.w * 255.0F) << 24;
+    col |= uint32_t(val.x * 255.0F);
+    col |= uint32_t(val.y * 255.0F) << 8;
+    col |= uint32_t(val.z * 255.0F) << 16;
     return col;
 }
 
-inline uint32_t ToPackedBGRA(const NVec4<float>& val)
+inline auto ToPackedBGRA(const NVec4<float>& val) -> uint32_t
 {
     uint32_t col = 0;
-    col |= uint32_t(val.w * 255.0f) << 8;
-    col |= uint32_t(val.x * 255.0f) << 16;
-    col |= uint32_t(val.y * 255.0f) << 24;
-    col |= uint32_t(val.z * 255.0f);
+    col |= uint32_t(val.w * 255.0F) << 8;
+    col |= uint32_t(val.x * 255.0F) << 16;
+    col |= uint32_t(val.y * 255.0F) << 24;
+    col |= uint32_t(val.z * 255.0F);
     return col;
 }
 
-inline float Luminosity(const NVec4<float>& intensity)
+inline auto Luminosity(const NVec4<float>& intensity) -> float
 {
-    return (0.2126f * intensity.x + 0.7152f * intensity.y + 0.0722f * intensity.z);
+    return (0.2126F * intensity.x + 0.7152F * intensity.y + 0.0722F * intensity.z);
 }
 
-inline NVec4<float> HSVToRGB(float h, float s, float v)
+inline auto HSVToRGB(float h, float s, float v) -> NVec4<float>
 {
-    auto r = 0.0f, g = 0.0f, b = 0.0f;
+    auto r = 0.0F;
+    auto g = 0.0F;
+    auto b = 0.0F;
 
     if (s == 0)
     {
@@ -268,19 +271,26 @@ inline NVec4<float> HSVToRGB(float h, float s, float v)
     else
     {
         int i;
-        float f, p, q, t;
+        float f;
+        float p;
+        float q;
+        float t;
 
         if (h == 360)
+        {
             h = 0;
+        }
         else
-            h = h / 60.0f;
+        {
+            h = h / 60.0F;
+        }
 
         i = (int)trunc(h);
-        f = h - i;
+        f = h - static_cast<float>(i);
 
-        p = v * (1.0f - s);
-        q = v * (1.0f - (s * f));
-        t = v * (1.0f - (s * (1.0f - f)));
+        p = v * (1.0F - s);
+        q = v * (1.0F - (s * f));
+        t = v * (1.0F - (s * (1.0F - f)));
 
         switch (i)
         {
@@ -320,29 +330,27 @@ inline NVec4<float> HSVToRGB(float h, float s, float v)
             b = q;
             break;
         }
-
     }
 
-    return NVec4<float>(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
+    return NVec4<float>(r / 255.0F, g / 255.0F, b / 255.0F, 1.0F);
 }
 
 using NVec4f = NVec4<float>;
-using NVec4i = NVec4<long>;
+using NVec4i = NVec4<int32_t>;
 
-template<class T>
+template <class T>
 struct NRect
 {
     NRect(const NVec2<T>& topLeft, const NVec2<T>& bottomRight)
-        : topLeftPx(topLeft),
-        bottomRightPx(bottomRight)
+        : topLeftPx(topLeft)
+        , bottomRightPx(bottomRight)
     {
     }
 
     NRect(T left, T top, T width, T height)
-        : topLeftPx(NVec2<T>(left, top)),
-        bottomRightPx(NVec2<T>(left, top) + NVec2<T>(width, height)) 
+        : topLeftPx(NVec2<T>(left, top))
+        , bottomRightPx(NVec2<T>(left, top) + NVec2<T>(width, height))
     {
-
     }
 
     NRect()
@@ -352,37 +360,36 @@ struct NRect
     NVec2f topLeftPx;
     NVec2f bottomRightPx;
 
-    bool Contains(const NVec2<T>& pt) const
+    auto Contains(const NVec2<T>& pt) const -> bool
     {
-        return topLeftPx.x <= pt.x && topLeftPx.y <= pt.y &&
-            bottomRightPx.x > pt.x && bottomRightPx.y > pt.y;
+        return topLeftPx.x <= pt.x && topLeftPx.y <= pt.y && bottomRightPx.x > pt.x && bottomRightPx.y > pt.y;
     }
 
-    NVec2f BottomLeft() const
+    [[nodiscard]] auto BottomLeft() const -> NVec2f
     {
         return NVec2f(topLeftPx.x, bottomRightPx.y);
     }
-    NVec2f TopRight() const
+    [[nodiscard]] auto TopRight() const -> NVec2f
     {
         return NVec2f(bottomRightPx.x, topLeftPx.y);
     }
-    float Height() const
+    [[nodiscard]] auto Height() const -> float
     {
         return bottomRightPx.y - topLeftPx.y;
     }
-    float Width() const
+    [[nodiscard]] auto Width() const -> float
     {
         return bottomRightPx.x - topLeftPx.x;
     }
-    NVec2f Center() const
+    [[nodiscard]] auto Center() const -> NVec2f
     {
         return (bottomRightPx + topLeftPx) * .5f;
     }
-    NVec2f Size() const
+    [[nodiscard]] auto Size() const -> NVec2f
     {
         return bottomRightPx - topLeftPx;
     }
-    bool Empty() const
+    [[nodiscard]] auto Empty() const -> bool
     {
         return (Height() == 0.0f || Width() == 0.0f) ? true : false;
     }
@@ -408,18 +415,18 @@ struct NRect
         bottomRightPx.y += y;
     }
 
-    bool operator==(const NRect<T>& region) const
+    auto operator==(const NRect<T>& region) const -> bool
     {
         return (topLeftPx == region.topLeftPx) && (bottomRightPx == region.bottomRightPx);
     }
-    bool operator!=(const NRect<T>& region) const
+    auto operator!=(const NRect<T>& region) const -> bool
     {
         return !(*this == region);
     }
 };
 
-template<class T>
-inline std::ostream& operator<< (std::ostream& str, const NRect<T>& region)
+template <class T>
+inline auto operator<<(std::ostream& str, const NRect<T>& region) -> std::ostream&
 {
     str << region.topLeftPx << ", " << region.bottomRightPx << ", size: " << region.Width() << ", " << region.Height();
     return str;
@@ -427,5 +434,4 @@ inline std::ostream& operator<< (std::ostream& str, const NRect<T>& region)
 
 using NRectf = NRect<float>;
 
-
-} // mcommon namespace
+} // namespace Zep

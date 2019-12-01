@@ -1,6 +1,9 @@
 #pragma once
 
-#include "zep/mcommon/math/math.h"
+#include <map>
+#include <vector>
+
+#include "zep/mcommon/math/math.hpp"
 
 namespace Zep
 {
@@ -73,14 +76,14 @@ class ZepTheme
 {
 public:
     ZepTheme();
-    virtual ~ZepTheme() {}
+    virtual ~ZepTheme() = default;
 
-    virtual NVec4f GetColor(ThemeColor themeColor) const;
-    virtual NVec4f GetComplement(const NVec4f& col, const NVec4f& adjust = NVec4f(0.0f)) const;
-    virtual ThemeColor GetUniqueColor(uint32_t id) const;
+    [[nodiscard]] virtual auto GetColor(ThemeColor themeColor) const -> NVec4f;
+    [[nodiscard]] virtual auto GetComplement(const NVec4f& col, const NVec4f& adjust) const -> NVec4f;
+    [[nodiscard]] virtual auto GetUniqueColor(uint32_t id) const -> ThemeColor;
 
     void SetThemeType(ThemeType type);
-    ThemeType GetThemeType() const;
+    [[nodiscard]] auto GetThemeType() const -> ThemeType;
 
 private:
     void SetDarkTheme();

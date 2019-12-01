@@ -1,4 +1,4 @@
-#include "zep/commands.h"
+#include "zep/commands.hpp"
 
 namespace Zep
 {
@@ -16,7 +16,7 @@ ZepCommand_DeleteRange::ZepCommand_DeleteRange(ZepBuffer& buffer, const BufferLo
     }
     else
     {
-        m_endOffset = std::min(m_endOffset, long(buffer.GetText().size()) - 1l);
+        m_endOffset = std::min((uint64_t)m_endOffset, buffer.GetText().size() - 1);
     }
 }
 
@@ -32,14 +32,15 @@ void ZepCommand_DeleteRange::Redo()
 
 void ZepCommand_DeleteRange::Undo()
 {
-    if (m_deleted.empty())
+    if (m_deleted.empty()) {
         return;
+}
     m_buffer.Insert(m_startOffset, m_deleted);
 }
 
 // Insert a string
 ZepCommand_Insert::ZepCommand_Insert(ZepBuffer& buffer, const BufferLocation& start, const std::string& str, const BufferLocation& cursor, const BufferLocation& cursorAfter)
-    : ZepCommand(buffer, cursor, cursorAfter != -1 ? cursorAfter : (start + long(str.length())))
+    : ZepCommand(buffer, cursor, cursorAfter != -1 ? cursorAfter : (start + int32_t(str.length())))
     , m_startOffset(start)
     , m_strInsert(str)
 {
@@ -52,7 +53,7 @@ void ZepCommand_Insert::Redo()
     assert(ret);
     if (ret == true)
     {
-        m_endOffsetInserted = m_buffer.LocationFromOffset(m_startOffset + long(m_strInsert.size()));
+        m_endOffsetInserted = Zep::ZepBuffer::LocationFromOffset(m_startOffset + m_strInsert.size());
     }
     else
     {
@@ -108,7 +109,7 @@ void ZepCommand_ReplaceRange::Undo()
         else
         {
             // Delete the previous inserted text
-            m_buffer.Delete(m_startOffset, m_buffer.LocationFromOffsetByChars(m_startOffset, (long)m_strReplace.length()));
+            m_buffer.Delete(m_startOffset, m_buffer.LocationFromOffsetByChars(m_startOffset, m_strReplace.length()));
             // Insert the deleted text
             m_buffer.Insert(m_startOffset, m_strDeleted);
         }

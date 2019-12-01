@@ -1,11 +1,9 @@
-#include "config_app.h"
-
-#include "zep/buffer.h"
-#include "zep/display.h"
-#include "zep/editor.h"
-#include "zep/mode_vim.h"
-#include "zep/tab_window.h"
-#include "zep/window.h"
+#include "zep/buffer.hpp"
+#include "zep/display.hpp"
+#include "zep/editor.hpp"
+#include "zep/mode_vim.hpp"
+#include "zep/tab_window.hpp"
+#include "zep/window.hpp"
 
 #include <gtest/gtest.h>
 

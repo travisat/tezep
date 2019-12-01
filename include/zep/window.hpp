@@ -1,10 +1,10 @@
 #pragma once
 
-#include <vector>
-#include <string>
+#include <cstdlib>
 #include <unordered_map>
+#include <vector>
 
-#include "buffer.h"
+#include "zep/buffer.hpp"
 
 namespace Zep
 {
@@ -19,32 +19,32 @@ struct Region;
 // A collection of spans that show split lines on the display
 struct SpanInfo
 {
-    BufferRange columnOffsets;                 // Begin/end range of the text buffer for this line, as always end is one beyond the end.
-    long lastNonCROffset = InvalidOffset; // The last char that is visible on the line (i.e. not CR/LF)
-    float spanYPx = 0.0f;                 // Position in the buffer in pixels, if the screen was as big as the buffer.
-    float textHeight = 0.0f;              // Height of the text region in the line
-    NVec2f margins = NVec2f(1.0f, 1.0f);  // Margin above and below the line
-    long bufferLineNumber = 0;            // Line in the original buffer, not the screen line
+    BufferRange columnOffsets; // Begin/end range of the text buffer for this line, as always end is one beyond the end.
+    int32_t lastNonCROffset = InvalidOffset; // The last char that is visible on the line (i.e. not CR/LF)
+    float spanYPx = 0.0F; // Position in the buffer in pixels, if the screen was as big as the buffer.
+    float textHeight = 0.0F; // Height of the text region in the line
+    NVec2f margins = NVec2f(1.0F, 1.0F); // Margin above and below the line
+    int32_t bufferLineNumber = 0; // Line in the original buffer, not the screen line
     int lineIndex = 0;
-    NVec2f pixelRenderRange;              // The x limits of where this line was last renderered
+    NVec2f pixelRenderRange; // The x limits of where this line was last renderered
 
-    float FullLineHeight() const
+    [[nodiscard]] auto FullLineHeight() const -> float
     {
         return margins.x + margins.y + textHeight;
     }
 
-    long Length() const
+    [[nodiscard]] auto Length() const -> int32_t
     {
         return columnOffsets.second - columnOffsets.first;
     }
 
-    bool BufferCursorInside(long offset) const
+    [[nodiscard]] auto BufferCursorInside(int32_t offset) const -> bool
     {
         return offset >= columnOffsets.first && offset < columnOffsets.second;
     }
 };
 
-inline bool operator < (const SpanInfo& lhs, const SpanInfo& rhs)
+inline auto operator<(const SpanInfo& lhs, const SpanInfo& rhs) -> bool
 {
     if (lhs.columnOffsets.first != rhs.columnOffsets.first)
     {
@@ -77,7 +77,7 @@ enum
     ShowCR = (1 << 1),
     Modal
 };
-}
+} // namespace WindowFlags
 
 struct AirBox
 {
@@ -95,7 +95,7 @@ struct Airline
 // Clients should return the marker information if appropriate
 struct ToolTipMessage : public ZepMessage
 {
-    ToolTipMessage(ZepBuffer* pBuff, const NVec2f& pos, const BufferLocation& loc = BufferLocation{-1})
+    ToolTipMessage(ZepBuffer* pBuff, const NVec2f& pos, const BufferLocation& loc = BufferLocation{ -1 })
         : ZepMessage(Msg::ToolTip, pos)
         , pBuffer(pBuff)
         , location(loc)
@@ -115,15 +115,15 @@ class ZepWindow : public ZepComponent
 {
 public:
     ZepWindow(ZepTabWindow& window, ZepBuffer* buffer);
-    virtual ~ZepWindow();
+    ~ZepWindow() override;
 
-    virtual void Notify(std::shared_ptr<ZepMessage> message) override;
+    void Notify(std::shared_ptr<ZepMessage> message) override;
 
     void SetCursorType(CursorType mode);
     void UpdateAirline();
     void UpdateScrollers();
 
-    ZepTabWindow& GetTabWindow() const;
+    [[nodiscard]] auto GetTabWindow() const -> ZepTabWindow&;
 
     void SetDisplayRegion(const NRectf& region);
 
@@ -131,29 +131,29 @@ public:
     void DisplayCursor();
 
     void MoveCursorY(int yDistance, LineLocation clampLocation = LineLocation::LineLastNonCR);
-    void MoveToBufferLine(long line, LineLocation clampLocation = LineLocation::LineFirstGraphChar);
+    void MoveToBufferLine(int32_t line, LineLocation clampLocation = LineLocation::LineFirstGraphChar);
 
-    BufferLocation GetBufferCursor();
+    auto GetBufferCursor() -> BufferLocation;
     void SetBufferCursor(BufferLocation location);
 
     // Flags
     void SetWindowFlags(uint32_t windowFlags);
-    uint32_t GetWindowFlags() const;
+    [[nodiscard]] auto GetWindowFlags() const -> uint32_t;
     void ToggleFlag(uint32_t flag);
 
-    long GetMaxDisplayLines();
-    long GetNumDisplayedLines();
+    auto GetMaxDisplayLines() -> int32_t;
+    auto GetNumDisplayedLines() -> int32_t;
 
-    ZepBuffer& GetBuffer() const;
+    [[nodiscard]] auto GetBuffer() const -> ZepBuffer&;
     void SetBuffer(ZepBuffer* pBuffer);
 
-    NVec2i BufferToDisplay();
-    NVec2i BufferToDisplay(const BufferLocation& location);
+    auto BufferToDisplay() -> NVec2i;
+    auto BufferToDisplay(const BufferLocation& location) -> NVec2i;
 
-    float ToWindowY(float pos) const;
+    [[nodiscard]] auto ToWindowY(float pos) const -> float;
 
-    bool IsActiveWindow() const;
-    NVec4f FilterActiveColor(const NVec4f& col, float atten = 1.0f);
+    [[nodiscard]] auto IsActiveWindow() const -> bool;
+    auto FilterActiveColor(const NVec4f& col, float atten = 1.0F) -> NVec4f;
 
     void UpdateLayout(bool force = false);
 
@@ -162,7 +162,7 @@ public:
         X,
         Y
     };
-    bool RectFits(const NRectf& area, const NRectf& rect, FitCriteria criteria);
+    auto RectFits(const NRectf& area, const NRectf& rect, FitCriteria criteria) -> bool;
 
 private:
     struct WindowPass
@@ -180,37 +180,37 @@ private:
     void ScrollToCursor();
     void EnsureCursorVisible();
     void UpdateVisibleLineRange();
-    bool IsInsideTextRegion(NVec2i pos) const;
+    [[nodiscard]] auto IsInsideTextRegion(NVec2i pos) const -> bool;
 
     void GetCharPointer(BufferLocation loc, const utf8*& pBegin, const utf8*& pEnd, bool& invalidChar);
-    const SpanInfo& GetCursorLineInfo(long y);
+    auto GetCursorLineInfo(int32_t y) -> const SpanInfo&;
 
-    float TipBoxShadowWidth() const;
+    [[nodiscard]] auto TipBoxShadowWidth() const -> float;
     void DisplayToolTip(const NVec2f& pos, const RangeMarker& marker) const;
-    bool DisplayLine(SpanInfo& lineInfo, int displayPass);
+    auto DisplayLine(SpanInfo& lineInfo, int displayPass) -> bool;
     void DisplayScrollers();
     void DisableToolTipTillMove();
 
-    NVec4f GetBlendedColor(ThemeColor color) const;
+    [[nodiscard]] auto GetBlendedColor(ThemeColor color) const -> NVec4f;
     void GetCursorInfo(NVec2f& pos, NVec2f& size);
 
-    void PlaceToolTip(const NVec2f& pos, ToolTipPos location, uint32_t lineGap, const std::shared_ptr<RangeMarker> spMarker);
+    void PlaceToolTip(const NVec2f& pos, ToolTipPos location, uint32_t lineGap, std::shared_ptr<RangeMarker> spMarker);
 
     void DrawLineWidgets(SpanInfo& lineInfo);
-private:
 
-    float GetLineTopMargin(long line);
-    std::shared_ptr<Region> m_bufferRegion;  // region of the display we are showing on.
-    std::shared_ptr<Region> m_textRegion;    // region of the display for text.
+private:
+    auto GetLineTopMargin(int32_t line) -> float;
+    std::shared_ptr<Region> m_bufferRegion; // region of the display we are showing on.
+    std::shared_ptr<Region> m_textRegion; // region of the display for text.
     std::shared_ptr<Region> m_airlineRegion; // Airline
-    std::shared_ptr<Region> m_numberRegion;     // Numbers
-    std::shared_ptr<Region> m_indicatorRegion;  // Indicators 
-    std::shared_ptr<Region> m_vScrollRegion;    // Vertical scroller
+    std::shared_ptr<Region> m_numberRegion; // Numbers
+    std::shared_ptr<Region> m_indicatorRegion; // Indicators
+    std::shared_ptr<Region> m_vScrollRegion; // Vertical scroller
 
     // Wrap ; need horizontal offset for this to be turned on.
     // This will indeed stop lines wrapping though!  You just can't move to the far right and have
     // the text scroll; which isn't a big deal, but a work item.
-    bool m_wrap = true;     
+    bool m_wrap = true;
 
     // The buffer offset is where we are looking, but the cursor is only what you see on the screen
     CursorType m_cursorType = CursorType::Normal; // Type of cursor
@@ -219,9 +219,9 @@ private:
     // Visual stuff
     std::vector<std::string> m_statusLines; // Status information, shown under the buffer
 
-    float m_bufferOffsetYPx = 0.0f;
-    float m_bufferSizeYPx = 0.0f;
-    NVec2i m_visibleLineRange = {0, 0};  // Offset of the displayed area into the text
+    float m_bufferOffsetYPx = 0.0F;
+    float m_bufferSizeYPx = 0.0F;
+    NVec2i m_visibleLineRange = { 0, 0 }; // Offset of the displayed area into the text
 
     std::vector<SpanInfo*> m_windowLines; // Information about the currently displayed lines
 
@@ -229,11 +229,11 @@ private:
 
     uint32_t m_windowFlags = WindowFlags::ShowWhiteSpace;
 
-    long m_maxDisplayLines = 0;
+    int32_t m_maxDisplayLines = 0;
     float m_defaultLineSize = 0;
 
-    BufferLocation m_bufferCursor{0}; // Location in buffer coordinates.  Each window has a different buffer cursor
-    long m_lastCursorColumn = 0;      // The last cursor column (could be removed and recalculated)
+    BufferLocation m_bufferCursor{ 0 }; // Location in buffer coordinates.  Each window has a different buffer cursor
+    int32_t m_lastCursorColumn = 0; // The last cursor column (could be removed and recalculated)
 
     ZepBuffer* m_pBuffer = nullptr;
     Airline m_airline;
@@ -242,16 +242,15 @@ private:
     bool m_scrollVisibilityChanged = true;
     bool m_cursorMoved = true;
 
-    NVec2f m_visibleLineExtents;            // The pixel extents of all the lines
+    NVec2f m_visibleLineExtents; // The pixel extents of all the lines
 
     std::shared_ptr<Scroller> m_vScroller;
-    timer m_toolTipTimer;                   // Timer for when the tip is shown
-    NVec2f m_mouseHoverPos;                   // Current location for the tip
-    NVec2f m_lastTipQueryPos;               // last query location for the tip
-    bool m_tipDisabledTillMove = false;     // Certain operations will stop the tip until the mouse is moved
-    BufferLocation m_mouseBufferLocation;     // The character in the buffer the tip pos is over, or -1
-    std::map<NVec2f, std::shared_ptr<RangeMarker>> m_toolTips;  // All tooltips for a given position, currently only 1 at a time
-
+    timer m_toolTipTimer; // Timer for when the tip is shown
+    NVec2f m_mouseHoverPos; // Current location for the tip
+    NVec2f m_lastTipQueryPos; // last query location for the tip
+    bool m_tipDisabledTillMove = false; // Certain operations will stop the tip until the mouse is moved
+    BufferLocation m_mouseBufferLocation; // The character in the buffer the tip pos is over, or -1
+    std::map<NVec2f, std::shared_ptr<RangeMarker>> m_toolTips; // All tooltips for a given position, currently only 1 at a time
 };
 
 } // namespace Zep
