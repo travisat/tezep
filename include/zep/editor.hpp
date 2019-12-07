@@ -217,8 +217,8 @@ public:
     ~ZepEditor();
 
     void LoadConfig(const ZepPath& config_path);
-    void LoadConfig(std::shared_ptr<cpptoml::table> spConfig);
-    void SaveConfig(std::shared_ptr<cpptoml::table> spConfig);
+    void LoadConfig(const std::shared_ptr<cpptoml::table>& spConfig);
+    void SaveConfig(const std::shared_ptr<cpptoml::table>& spConfig);
     void RequestQuit();
 
     void Reset();

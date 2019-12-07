@@ -153,7 +153,7 @@ void ZepEditor::LoadConfig(const ZepPath& config_path)
     }
 }
 
-void ZepEditor::LoadConfig(std::shared_ptr<cpptoml::table> spConfig)
+void ZepEditor::LoadConfig(const std::shared_ptr<cpptoml::table>& spConfig)
 {
     try
     {
@@ -184,7 +184,7 @@ void ZepEditor::LoadConfig(std::shared_ptr<cpptoml::table> spConfig)
     }
 }
 
-void ZepEditor::SaveConfig(std::shared_ptr<cpptoml::table> spConfig)
+void ZepEditor::SaveConfig(const std::shared_ptr<cpptoml::table>& spConfig)
 {
     auto table = spConfig->get_table("editor");
     if (!table)
