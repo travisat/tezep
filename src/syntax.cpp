@@ -7,6 +7,7 @@
 #include "zep/mcommon/string/stringutils.hpp"
 
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace Zep
@@ -14,13 +15,13 @@ namespace Zep
 
 ZepSyntax::ZepSyntax(
     ZepBuffer& buffer,
-    const std::set<std::string>& keywords,
-    const std::set<std::string>& identifiers,
+    std::set<std::string> keywords,
+    std::set<std::string> identifiers,
     uint32_t flags)
     : ZepComponent(buffer.GetEditor())
     , m_buffer(buffer)
-    , m_keywords(keywords)
-    , m_identifiers(identifiers)
+    , m_keywords(std::move(keywords))
+    , m_identifiers(std::move(identifiers))
     , m_stop(false)
     , m_flags(flags)
 {

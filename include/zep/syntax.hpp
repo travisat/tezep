@@ -40,9 +40,9 @@ class ZepSyntaxAdorn;
 class ZepSyntax : public ZepComponent
 {
 public:
-    explicit ZepSyntax(ZepBuffer& buffer,
-        const std::set<std::string>& keywords = std::set<std::string>{},
-        const std::set<std::string>& identifiers = std::set<std::string>{},
+    ZepSyntax(ZepBuffer& buffer,
+        std::set<std::string> keywords = std::set<std::string>{},
+        std::set<std::string> identifiers = std::set<std::string>{},
         uint32_t flags = 0);
     ~ZepSyntax() override;
 

@@ -4,7 +4,6 @@
 #include <locale>
 #include <string>
 
-
 #include <codecvt>
 
 #include "zep/mcommon/string/stringutils.hpp"
@@ -69,7 +68,7 @@ auto murmur_hash(const void* key, int len, uint32_t seed) -> uint32_t
     unsigned int h = seed ^ len;
 
     // Mix 4 bytes at a time into the hash
-    const auto* data = (const unsigned char*)key;
+    const auto* data = reinterpret_cast<const unsigned char*>(key);
 
     while (len >= 4)
     {
@@ -101,6 +100,7 @@ auto murmur_hash(const void* key, int len, uint32_t seed) -> uint32_t
     case 1:
         h ^= data[0];
         h *= m;
+    default:;
     };
 
     // Do a few final mixes of the hash to ensure the last few
@@ -161,7 +161,7 @@ auto murmur_hash_64(const void* key, uint32_t len, uint64_t seed) -> uint64_t
 
     uint64_t h = seed ^ (len * m);
 
-    const auto* data = (const uint64_t*)key;
+    const auto* data = reinterpret_cast<const uint64_t*>(key);
     const uint64_t* end = data + (len / 8);
 
     while (data != end)
@@ -194,7 +194,7 @@ auto murmur_hash_64(const void* key, uint32_t len, uint64_t seed) -> uint64_t
         h *= m;
     }
 
-    const auto* data2 = (const unsigned char*)data;
+    const auto* data2 = reinterpret_cast<const unsigned char*>(data);
 
     switch (len & 7)
     {
@@ -248,7 +248,7 @@ void string_split(const std::string& text, const char* delims, std::vector<std::
     }
 }
 
-void string_split_each(const std::string& text, const char* delims, std::function<bool(size_t, size_t)> fn)
+void string_split_each(const std::string& text, const char* delims, const std::function<bool(size_t, size_t)>& fn)
 {
     std::size_t start = text.find_first_not_of(delims);
     std::size_t end = 0;
@@ -305,7 +305,7 @@ auto string_first_of(const char* text, size_t start, size_t end, const char* del
     return std::string::npos;
 }
 
-void string_split_each(char* text, size_t startIndex, size_t endIndex, const char* delims, std::function<bool(size_t, size_t)> fn)
+void string_split_each(char* text, size_t startIndex, size_t endIndex, const char* delims, const std::function<bool(size_t, size_t)>& fn)
 {
     // Skip delims (start now at first thing that is not a delim)
     std::size_t start = string_first_not_of(text, startIndex, endIndex, delims);
@@ -352,14 +352,14 @@ StringId::StringId(const std::string& str)
     stringLookup[id] = str;
 }
 
-auto StringId::operator=(const char* pszString) -> const StringId&
+auto StringId::operator=(const char* pszString) -> StringId&
 {
     id = murmur_hash(pszString, (int)strlen(pszString), 0);
     stringLookup[id] = pszString;
     return *this;
 }
 
-auto StringId::operator=(const std::string& str) -> const StringId&
+auto StringId::operator=(const std::string& str) -> StringId&
 {
     id = murmur_hash(str.c_str(), (int)str.length(), 0);
     stringLookup[id] = str;

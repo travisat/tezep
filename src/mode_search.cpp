@@ -5,7 +5,8 @@
 
 #include "zep/mcommon/logger.hpp"
 #include "zep/mcommon/threadutils.hpp"
-#include "zep/mcommon/file/fnmatch.hpp"
+
+#include "mcommon/file/fnmatch.hpp"
 
 namespace Zep
 {

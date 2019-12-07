@@ -142,8 +142,8 @@ inline auto operator<<(std::ostream& str, StringId id) -> std::ostream&
 void string_split(const std::string& text, const char* delims, std::vector<std::string>& tokens);
 auto string_split(const std::string& text, const char* delims) -> std::vector<std::string>;
 void string_split_lines(const std::string& text, std::vector<std::string>& tokens);
-void string_split_each(const std::string& text, const char* delims, std::function<bool(size_t, size_t)> fn);
-void string_split_each(char* text, size_t start, size_t end, const char* delims, std::function<bool(size_t, size_t)> fn);
+void string_split_each(const std::string& text, const char* delims, const std::function<bool(size_t, size_t)>& fn);
+void string_split_each(char* text, size_t start, size_t end, const char* delims, const std::function<bool(size_t, size_t)>& fn);
 auto string_first_of(const char* text, size_t start, size_t end, const char* delims) -> size_t;
 auto string_first_not_of(const char* text, size_t start, size_t end, const char* delims) -> size_t;
 
