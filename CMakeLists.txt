@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.2)
 message(STATUS " CMakeLists: Zep")
 
 # Global Options
-option(BUILD_QT "Make Qt Library" OFF)
 option(BUILD_IMGUI "Make Imgui Library" ON)
 option(BUILD_DEMOS "Make the demo app" ON)
 option(BUILD_TESTS "Make the tests" ON)
@@ -61,7 +60,6 @@ include (tests/CMakeLists.txt)
 IF (BUILD_DEMOS)
 include(${M3RDPARTY_DIR}/list.cmake)
 include(demo_imgui/CMakeLists.txt)
-include(demo_qt/CMakeLists.txt)
 ENDIF()
 
 # Make the CMake bits that ensure find_package does the right thing

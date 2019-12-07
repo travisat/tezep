@@ -1,38 +1,48 @@
 #pragma once
 
 #include <functional>
-#include <string>
 #include <ostream>
 #include <sstream>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
 namespace Zep
 {
 
-inline size_t CountUtf8BytesFromChar(unsigned int c)
+inline auto CountUtf8BytesFromChar(unsigned int c) -> size_t
 {
     if (c < 0x80)
+    {
         return 1;
+    }
     if (c < 0x800)
+    {
         return 2;
+    }
     if (c >= 0xdc00 && c < 0xe000)
+    {
         return 0;
+    }
     if (c >= 0xd800 && c < 0xdc00)
+    {
         return 4;
+    }
     return 3;
 }
 
-inline size_t Utf8Length(const char* s)
+inline auto Utf8Length(const char* s) -> size_t
 {
     size_t stringLength = 0;
     while (*s != 0)
     {
         size_t len = 1;
-        while (len <= 4 && *s)
+        while (len <= 4 && (*s != 0))
         {
             if ((*s++ & 0xc0) != 0x80)
+            {
                 break;
+            }
             len++;
         }
         stringLength += len;
@@ -40,31 +50,31 @@ inline size_t Utf8Length(const char* s)
     return stringLength;
 }
 
-std::string string_replace(std::string subject, const std::string& search, const std::string& replace);
+auto string_replace(std::string subject, const std::string& search, const std::string& replace) -> std::string;
 void string_replace_in_place(std::string& subject, const std::string& search, const std::string& replace);
 
 // trim from beginning of string (left)
-inline std::string& LTrim(std::string& s, const char* t = " \t\n\r\f\v")
+inline auto LTrim(std::string& s, const char* t = " \t\n\r\f\v") -> std::string&
 {
     s.erase(0, s.find_first_not_of(t));
     return s;
 }
 
 // trim from end of string (right)
-inline std::string& RTrim(std::string& s, const char* t = " \t\n\r\f\v")
+inline auto RTrim(std::string& s, const char* t = " \t\n\r\f\v") -> std::string&
 {
     s.erase(s.find_last_not_of(t) + 1);
     return s;
 }
 
 // trim from both ends of string (left & right)
-inline std::string& Trim(std::string& s, const char* t = " \t\n\r\f\v")
+inline auto Trim(std::string& s, const char* t = " \t\n\r\f\v") -> std::string&
 {
     return LTrim(RTrim(s, t), t);
 }
 
 template <typename T>
-std::string toString(const T& t)
+auto toString(const T& t) -> std::string
 {
     std::ostringstream oss;
     oss << t;
@@ -72,7 +82,7 @@ std::string toString(const T& t)
 }
 
 template <typename T>
-T fromString(const std::string& s)
+auto fromString(const std::string& s) -> T
 {
     std::istringstream stream(s);
     T t;
@@ -80,20 +90,18 @@ T fromString(const std::string& s)
     return t;
 }
 
-inline std::wstring makeWStr(const std::string& str)
+inline auto makeWStr(const std::string& str) -> std::wstring
 {
     return std::wstring(str.begin(), str.end());
 }
 
-std::string string_from_wstring(const std::wstring& str);
-std::string string_tolower(const std::string& str);
+auto string_from_wstring(const std::wstring& str) -> std::string;
+auto string_tolower(const std::string& str) -> std::string;
 
 struct StringId
 {
     uint32_t id = 0;
-    StringId()
-    {
-    }
+    StringId() = default;
     StringId(const char* pszString);
     StringId(const std::string& str);
     StringId(uint32_t _id)
@@ -101,18 +109,18 @@ struct StringId
         id = _id;
     }
 
-    bool operator==(const StringId& rhs) const
+    auto operator==(const StringId& rhs) const -> bool
     {
         return id == rhs.id;
     }
-    const StringId& operator=(const char* pszString);
-    const StringId& operator=(const std::string& str);
-    bool operator<(const StringId& rhs) const
+    auto operator=(const char* pszString) -> StringId&;
+    auto operator=(const std::string& str) -> StringId&;
+    auto operator<(const StringId& rhs) const -> bool
     {
         return id < rhs.id;
     }
 
-    std::string ToString() const
+    [[nodiscard]] auto ToString() const -> std::string
     {
         auto itr = stringLookup.find(id);
         if (itr == stringLookup.end())
@@ -125,21 +133,21 @@ struct StringId
     static std::unordered_map<uint32_t, std::string> stringLookup;
 };
 
-inline std::ostream& operator<<(std::ostream& str, StringId id)
+inline auto operator<<(std::ostream& str, StringId id) -> std::ostream&
 {
     str << id.ToString();
     return str;
 }
 
 void string_split(const std::string& text, const char* delims, std::vector<std::string>& tokens);
-std::vector<std::string> string_split(const std::string& text, const char* delims);
+auto string_split(const std::string& text, const char* delims) -> std::vector<std::string>;
 void string_split_lines(const std::string& text, std::vector<std::string>& tokens);
 void string_split_each(const std::string& text, const char* delims, std::function<bool(size_t, size_t)> fn);
 void string_split_each(char* text, size_t start, size_t end, const char* delims, std::function<bool(size_t, size_t)> fn);
-size_t string_first_of(const char* text, size_t start, size_t end, const char* delims);
-size_t string_first_not_of(const char* text, size_t start, size_t end, const char* delims);
+auto string_first_of(const char* text, size_t start, size_t end, const char* delims) -> size_t;
+auto string_first_not_of(const char* text, size_t start, size_t end, const char* delims) -> size_t;
 
-inline bool string_equals(const std::string& str, const std::string& str2)
+inline auto string_equals(const std::string& str, const std::string& str2) -> bool
 {
     return str == str2;
 }
@@ -150,7 +158,7 @@ namespace std
 template <>
 struct hash<Zep::StringId>
 {
-    std::size_t operator()(const Zep::StringId& k) const
+    auto operator()(const Zep::StringId& k) const -> std::size_t
     {
         // Compute individual hash values for first,
         // second and third and combine them using XOR
@@ -163,7 +171,7 @@ struct hash<Zep::StringId>
 
 namespace Zep
 {
-inline bool string_equals(const StringId lhs, const StringId rhs)
+inline auto string_equals(const StringId lhs, const StringId rhs) -> bool
 {
     return lhs.id == rhs.id;
 }
