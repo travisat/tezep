@@ -98,12 +98,12 @@ void ZepSyntax::QueueUpdateSyntax(BufferLocation startLocation, BufferLocation e
     });
 }
 
-void ZepSyntax::Notify(std::shared_ptr<ZepMessage> spMsg)
+void ZepSyntax::Notify(std::shared_ptr<ZepMessage> message)
 {
     // Handle any interesting buffer messages
-    if (spMsg->messageId == Msg::Buffer)
+    if (message->messageId == Msg::Buffer)
     {
-        auto spBufferMsg = std::static_pointer_cast<BufferMessage>(spMsg);
+        auto spBufferMsg = std::static_pointer_cast<BufferMessage>(message);
         if (spBufferMsg->pBuffer != &m_buffer)
         {
             return;

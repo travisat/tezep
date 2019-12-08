@@ -249,7 +249,7 @@ private:
     NVec2f m_mouseHoverPos; // Current location for the tip
     NVec2f m_lastTipQueryPos; // last query location for the tip
     bool m_tipDisabledTillMove = false; // Certain operations will stop the tip until the mouse is moved
-    BufferLocation m_mouseBufferLocation; // The character in the buffer the tip pos is over, or -1
+    BufferLocation m_mouseBufferLocation = -1; // The character in the buffer the tip pos is over, or -1
     std::map<NVec2f, std::shared_ptr<RangeMarker>> m_toolTips; // All tooltips for a given position, currently only 1 at a time
 };
 

@@ -1,7 +1,10 @@
-#include "zep/mode_search.hpp"
+#include <utility>
+
 #include "zep/filesystem.hpp"
+#include "zep/mode_search.hpp"
 #include "zep/tab_window.hpp"
 #include "zep/window.hpp"
+
 
 #include "zep/mcommon/logger.hpp"
 #include "zep/mcommon/threadutils.hpp"
@@ -11,11 +14,11 @@
 namespace Zep
 {
 
-ZepMode_Search::ZepMode_Search(ZepEditor& editor, ZepWindow& launchWindow, ZepWindow& window, const ZepPath& path)
+ZepMode_Search::ZepMode_Search(ZepEditor& editor, ZepWindow& launchWindow, ZepWindow& window, ZepPath startPath)
     : ZepMode(editor)
     , m_launchWindow(launchWindow)
     , m_window(window)
-    , m_startPath(path)
+    , m_startPath(std::move(startPath))
 {
 }
 

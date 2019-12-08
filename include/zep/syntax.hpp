@@ -46,7 +46,7 @@ public:
         uint32_t flags = 0);
     ~ZepSyntax() override;
 
-    virtual auto GetSyntaxAt(int32_t index) const -> SyntaxData;
+    virtual auto GetSyntaxAt(int32_t offset) const -> SyntaxData;
     virtual void UpdateSyntax();
     virtual void Interrupt();
     virtual void Wait() const;
@@ -59,7 +59,7 @@ public:
     {
         return m_syntax;
     }
-    void Notify(std::shared_ptr<ZepMessage> payload) override;
+    void Notify(std::shared_ptr<ZepMessage> message) override;
 
 private:
     virtual void QueueUpdateSyntax(BufferLocation startLocation, BufferLocation endLocation);

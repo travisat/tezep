@@ -10,8 +10,6 @@
 #include <utility>
 #include <vector>
 
-#include "zep/zep_config.hpp"
-
 #include "zep/mcommon/animation/timer.hpp"
 #include "zep/mcommon/file/cpptoml.hpp"
 #include "zep/mcommon/file/path.hpp"
@@ -183,10 +181,7 @@ const float bottomBorder = 4.F;
 const float textBorder = 4.F;
 const float leftBorderChars = 3;
 
-#define DPI_VEC2(value) ((value)*GetEditor().GetPixelScale())
-#define DPI_Y(value) (GetEditor().GetPixelScale() * (value))
-#define DPI_X(value) (GetEditor().GetPixelScale() * (value))
-#define DPI_RECT(value) ((value)*GetEditor().GetPixelScale())
+#define DPI(value) ((value)*GetEditor().GetPixelScale())
 
 enum class EditorStyle
 {
@@ -226,7 +221,7 @@ public:
     auto InitWithText(const std::string& strName, const std::string& strText) -> ZepBuffer*;
 
     auto GetGlobalMode() -> ZepMode*;
-    void RegisterGlobalMode(std::shared_ptr<ZepMode> spMode);
+    void RegisterGlobalMode(const std::shared_ptr<ZepMode>& spMode);
     void SetGlobalMode(const std::string& mode);
     auto GetSecondaryMode() const -> ZepMode*;
 

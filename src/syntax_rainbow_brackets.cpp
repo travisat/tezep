@@ -18,12 +18,12 @@ ZepSyntaxAdorn_RainbowBrackets::ZepSyntaxAdorn_RainbowBrackets(ZepSyntax& syntax
 
 ZepSyntaxAdorn_RainbowBrackets::~ZepSyntaxAdorn_RainbowBrackets() = default;
 
-void ZepSyntaxAdorn_RainbowBrackets::Notify(std::shared_ptr<ZepMessage> spMsg)
+void ZepSyntaxAdorn_RainbowBrackets::Notify(std::shared_ptr<ZepMessage> message) 
 {
     // Handle any interesting buffer messages
-    if (spMsg->messageId == Msg::Buffer)
+    if (message->messageId == Msg::Buffer)
     {
-        auto spBufferMsg = std::static_pointer_cast<BufferMessage>(spMsg);
+        auto spBufferMsg = std::static_pointer_cast<BufferMessage>(message);
         if (spBufferMsg->pBuffer != &m_buffer)
         {
             return;

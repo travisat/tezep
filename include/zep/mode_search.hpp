@@ -12,7 +12,7 @@ class ZepWindow;
 class ZepMode_Search : public ZepMode
 {
 public:
-    ZepMode_Search(ZepEditor& editor, ZepWindow& previousWindow, ZepWindow& window, const ZepPath& startPath);
+    ZepMode_Search(ZepEditor& editor, ZepWindow& launchWindow, ZepWindow& window, ZepPath startPath);
     ~ZepMode_Search() override;
 
     void AddKeyPress(uint32_t key, uint32_t modifiers) override;

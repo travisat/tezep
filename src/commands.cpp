@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "zep/commands.hpp"
 
 namespace Zep
@@ -32,9 +34,10 @@ void ZepCommand_DeleteRange::Redo()
 
 void ZepCommand_DeleteRange::Undo()
 {
-    if (m_deleted.empty()) {
+    if (m_deleted.empty())
+    {
         return;
-}
+    }
     m_buffer.Insert(m_startOffset, m_deleted);
 }
 
@@ -70,11 +73,11 @@ void ZepCommand_Insert::Undo()
 }
 
 // Replace
-ZepCommand_ReplaceRange::ZepCommand_ReplaceRange(ZepBuffer& buffer, ReplaceRangeMode mode, const BufferLocation& startOffset, const BufferLocation& endOffset, const std::string& strReplace, const BufferLocation& cursor, const BufferLocation& cursorAfter)
+ZepCommand_ReplaceRange::ZepCommand_ReplaceRange(ZepBuffer& buffer, ReplaceRangeMode mode, const BufferLocation& startOffset, const BufferLocation& endOffset, std::string strReplace, const BufferLocation& cursor, const BufferLocation& cursorAfter)
     : ZepCommand(buffer, cursor != -1 ? cursor : endOffset, cursorAfter != -1 ? cursorAfter : startOffset)
     , m_startOffset(startOffset)
     , m_endOffset(endOffset)
-    , m_strReplace(strReplace)
+    , m_strReplace(std::move(strReplace))
     , m_mode(mode)
 {
     m_startOffset = buffer.Clamp(m_startOffset);

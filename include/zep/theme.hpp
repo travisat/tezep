@@ -80,7 +80,7 @@ public:
 
     [[nodiscard]] virtual auto GetColor(ThemeColor themeColor) const -> NVec4f;
     [[nodiscard]] virtual auto GetComplement(const NVec4f& col, const NVec4f& adjust) const -> NVec4f;
-    [[nodiscard]] virtual auto GetUniqueColor(uint32_t id) const -> ThemeColor;
+    [[nodiscard]] virtual auto GetUniqueColor(uint32_t index) const -> ThemeColor;
 
     void SetThemeType(ThemeType type);
     [[nodiscard]] auto GetThemeType() const -> ThemeType;

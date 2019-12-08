@@ -77,7 +77,7 @@ enum class ReplaceRangeMode
 class ZepCommand_ReplaceRange : public ZepCommand
 {
 public:
-    ZepCommand_ReplaceRange(ZepBuffer& buffer, ReplaceRangeMode replaceMode, const BufferLocation& startOffset, const BufferLocation& endOffset, const std::string& ch, const BufferLocation& cursor = BufferLocation{ -1 }, const BufferLocation& cursorAfter = BufferLocation{ -1 });
+    ZepCommand_ReplaceRange(ZepBuffer& buffer, ReplaceRangeMode mode, const BufferLocation& startOffset, const BufferLocation& endOffset, std::string strReplace, const BufferLocation& cursor = BufferLocation{ -1 }, const BufferLocation& cursorAfter = BufferLocation{ -1 });
     ~ZepCommand_ReplaceRange() override = default;
     ;
 

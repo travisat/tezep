@@ -592,7 +592,7 @@ auto ZepEditor::GetTabWindows() const -> const ZepEditor::tTabWindows&
     return m_tabWindows;
 }
 
-void ZepEditor::RegisterGlobalMode(std::shared_ptr<ZepMode> spMode)
+void ZepEditor::RegisterGlobalMode(const std::shared_ptr<ZepMode>& spMode)
 {
     m_mapModes[spMode->Name()] = spMode;
 }
@@ -700,9 +700,9 @@ auto ZepEditor::GetBuffers() const -> const std::deque<std::shared_ptr<ZepBuffer
     return m_buffers;
 }
 
-auto ZepEditor::CreateNewBuffer(const std::string& str) -> ZepBuffer*
+auto ZepEditor::CreateNewBuffer(const std::string& bufferName) -> ZepBuffer*
 {
-    auto pBuffer = std::make_shared<ZepBuffer>(*this, str);
+    auto pBuffer = std::make_shared<ZepBuffer>(*this, bufferName);
 
     // For a new buffer, set the syntax based on the string name
     SetBufferSyntax(*pBuffer);

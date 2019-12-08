@@ -11,7 +11,7 @@ public:
     explicit ZepMode_Standard(ZepEditor& editor);
     ~ZepMode_Standard() override;
 
-    void AddKeyPress(uint32_t key, uint32_t modifiers) override;
+    void AddKeyPress(uint32_t key, uint32_t modifierKeys) override;
     void Begin() override;
 
     static auto StaticName() -> const char*

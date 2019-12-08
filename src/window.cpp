@@ -19,7 +19,11 @@ namespace Zep
 {
 
 // UTF8 Not supported yet.
-#define UTF8_CHAR_LEN(byte) (((0xE5000000 >> (((byte) >> 3) & 0x1e)) & 3) + 1)
+template <typename T>
+inline auto UTF8_CHAR_LEN(T t) -> T
+{
+    return (((0xE5000000 >> (((t) >> 3) & 0x1e)) & 3) + 1);
+};
 
 const float ScrollBarSize = 17.0F;
 ZepWindow::ZepWindow(ZepTabWindow& window, ZepBuffer* buffer)
@@ -139,11 +143,11 @@ void ZepWindow::SetCursorType(CursorType mode)
     GetEditor().ResetCursorTimer();
 }
 
-void ZepWindow::Notify(std::shared_ptr<ZepMessage> payload)
+void ZepWindow::Notify(std::shared_ptr<ZepMessage> message)
 {
-    if (payload->messageId == Msg::Buffer)
+    if (message->messageId == Msg::Buffer)
     {
-        auto pMsg = std::static_pointer_cast<BufferMessage>(payload);
+        auto pMsg = std::static_pointer_cast<BufferMessage>(message);
 
         if (pMsg->pBuffer != m_pBuffer)
         {
@@ -160,22 +164,22 @@ void ZepWindow::Notify(std::shared_ptr<ZepMessage> payload)
         // Remove tooltips that might be present
         DisableToolTipTillMove();
     }
-    else if (payload->messageId == Msg::ComponentChanged)
+    else if (message->messageId == Msg::ComponentChanged)
     {
-        if (payload->pComponent == m_vScroller.get())
+        if (message->pComponent == m_vScroller.get())
         {
-            auto pScroller = dynamic_cast<Scroller*>(payload->pComponent);
+            auto pScroller = dynamic_cast<Scroller*>(message->pComponent);
             m_bufferOffsetYPx = pScroller->vScrollPosition * (m_windowLines.size() * GetEditor().GetDisplay().GetFontHeightPixels());
             UpdateVisibleLineRange();
             EnsureCursorVisible();
             DisableToolTipTillMove();
         }
     }
-    else if (payload->messageId == Msg::MouseMove)
+    else if (message->messageId == Msg::MouseMove)
     {
         if (!m_toolTips.empty())
         {
-            if (ManhattanDistance(m_mouseHoverPos, payload->pos) > 4.0F)
+            if (ManhattanDistance(m_mouseHoverPos, message->pos) > 4.0F)
             {
                 timer_restart(m_toolTipTimer);
                 m_toolTips.clear();
@@ -184,13 +188,13 @@ void ZepWindow::Notify(std::shared_ptr<ZepMessage> payload)
         else
         {
             timer_restart(m_toolTipTimer);
-            m_mouseHoverPos = payload->pos;
+            m_mouseHoverPos = message->pos;
 
             // Can now show tooltip again, due to mouse hover
             m_tipDisabledTillMove = false;
         }
     }
-    else if (payload->messageId == Msg::ConfigChanged)
+    else if (message->messageId == Msg::ConfigChanged)
     {
         m_layoutDirty = true;
     }
@@ -292,14 +296,14 @@ void ZepWindow::GetCharPointer(BufferLocation loc, const utf8*& pBegin, const ut
 
 auto ZepWindow::GetLineTopMargin(int32_t line) -> float
 {
-    float height = DPI_Y((float)GetEditor().GetConfig().lineMargins.x);
+    float height = DPI((float)GetEditor().GetConfig().lineMargins.x);
     auto pLineWidgets = m_pBuffer->GetLineWidgets(line);
     if (pLineWidgets != nullptr)
     {
         for (auto& widget : *pLineWidgets)
         {
-            auto size = DPI_VEC2(widget->GetSize());
-            auto margins = DPI_VEC2(GetEditor().GetConfig().widgetMargins);
+            auto size = DPI(widget->GetSize());
+            auto margins = DPI(GetEditor().GetConfig().widgetMargins);
 
             // Each widget has a margin then its height then the bottom
             height += margins.x;
@@ -308,7 +312,7 @@ auto ZepWindow::GetLineTopMargin(int32_t line) -> float
         }
     }
     // Add the line margin too, so the widget sits in a space similar to a line
-    height += DPI_Y((float)GetEditor().GetConfig().lineMargins.y);
+    height += DPI((float)GetEditor().GetConfig().lineMargins.y);
 
     return height;
 }
@@ -359,7 +363,7 @@ void ZepWindow::UpdateLineSpans()
             break;
         }
 
-        NVec2f margins = NVec2f(GetLineTopMargin(bufferLine), DPI_Y((float)GetEditor().GetConfig().lineMargins.y));
+        NVec2f margins = NVec2f(GetLineTopMargin(bufferLine), DPI((float)GetEditor().GetConfig().lineMargins.y));
         float fullLineHeight = textHeight + margins.x + margins.y;
 
         // Start a new line
@@ -447,7 +451,7 @@ void ZepWindow::UpdateLineSpans()
         m_windowLines.push_back(lineInfo);
     }
 
-    m_bufferSizeYPx = m_windowLines[m_windowLines.size() - 1]->spanYPx + textHeight + DPI_Y(GetEditor().GetConfig().lineMargins.y);
+    m_bufferSizeYPx = m_windowLines[m_windowLines.size() - 1]->spanYPx + textHeight + DPI(GetEditor().GetConfig().lineMargins.y);
 
     UpdateVisibleLineRange();
     m_layoutDirty = true;
@@ -500,7 +504,7 @@ auto ZepWindow::ToWindowY(float pos) const -> float
 
 auto ZepWindow::TipBoxShadowWidth() const -> float
 {
-    return DPI_X(4.0F);
+    return DPI(4.0F);
 }
 
 void ZepWindow::DisplayToolTip(const NVec2f& pos, const RangeMarker& marker) const
@@ -553,8 +557,8 @@ void ZepWindow::DrawLineWidgets(SpanInfo& lineInfo)
         return;
     }
 
-    auto lineMargins = DPI_VEC2(GetEditor().GetConfig().lineMargins);
-    auto widgetMargins = DPI_VEC2(GetEditor().GetConfig().widgetMargins);
+    auto lineMargins = DPI(GetEditor().GetConfig().lineMargins);
+    auto widgetMargins = DPI(GetEditor().GetConfig().widgetMargins);
 
     float currentY = lineMargins.x;
     for (auto& pWidget : *pLineWidgets)
@@ -853,7 +857,7 @@ auto ZepWindow::DisplayLine(SpanInfo& lineInfo, int displayPass) -> bool
     display.SetClipRect(NRectf{});
 
     return true;
-} // namespace Zep
+}
 
 auto ZepWindow::IsInsideTextRegion(NVec2i pos) const -> bool
 {

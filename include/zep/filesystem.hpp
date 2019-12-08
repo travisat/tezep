@@ -1,7 +1,5 @@
 #pragma once
 
-#include "zep/zep_config.hpp"
-
 #include "zep/mcommon/file/path.hpp"
 
 #include <functional>

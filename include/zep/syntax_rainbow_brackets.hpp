@@ -14,7 +14,7 @@ public:
     ZepSyntaxAdorn_RainbowBrackets(ZepSyntax& syntax, ZepBuffer& buffer);
     ~ZepSyntaxAdorn_RainbowBrackets() override;
 
-    void Notify(std::shared_ptr<ZepMessage> payload) override;
+    void Notify(std::shared_ptr<ZepMessage> message) override;
     auto GetSyntaxAt(int32_t offset, bool& found) const -> SyntaxData override;
 
     virtual void Clear(int32_t start, int32_t end);

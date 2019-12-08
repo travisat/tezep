@@ -222,7 +222,7 @@ public:
     auto LocationFromOffsetByChars(const BufferLocation& location, int32_t offset, LineLocation clampLimit = LineLocation::None) const -> BufferLocation;
     auto EndLocation() const -> BufferLocation;
 
-    auto GetText() const -> const GapBuffer<utf8>&
+    auto GetText() -> GapBuffer<utf8>&
     {
         return m_gapBuffer;
     }
