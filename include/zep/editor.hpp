@@ -232,8 +232,8 @@ public:
 
     void Display();
 
-    void RegisterSyntaxFactory(const std::vector<std::string>& mappings, const SyntaxProvider& factory);
-    auto Broadcast(const std::shared_ptr<ZepMessage>& payload) -> bool;
+    void RegisterSyntaxFactory(const std::vector<std::string>& mappings, const SyntaxProvider& provider);
+    auto Broadcast(const std::shared_ptr<ZepMessage>& message) -> bool;
     void RegisterCallback(IZepComponent* pClient)
     {
         m_notifyClients.insert(pClient);

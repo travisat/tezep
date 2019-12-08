@@ -67,9 +67,9 @@ inline auto IsNewlineOrEnd(const char c) -> bool
 using fnMatch = std::function<bool>(const char);
 
 } // namespace
-ZepBuffer::ZepBuffer(ZepEditor& editor, const std::string& strName)
+ZepBuffer::ZepBuffer(ZepEditor& editor, std::string strName)
     : ZepComponent(editor)
-    , m_strName(strName)
+    , m_strName(std::move(strName))
 {
     Clear();
 }
@@ -204,7 +204,7 @@ void ZepBuffer::Move(BufferLocation& loc, SearchDirection dir)
     }
 }
 
-auto ZepBuffer::Skip(fnMatch IsToken, BufferLocation& start, SearchDirection dir) const -> bool
+auto ZepBuffer::Skip(const fnMatch& IsToken, BufferLocation& start, SearchDirection dir) const -> bool
 {
     if (!Valid(start))
     {
@@ -220,7 +220,7 @@ auto ZepBuffer::Skip(fnMatch IsToken, BufferLocation& start, SearchDirection dir
     return moved;
 }
 
-auto ZepBuffer::SkipOne(fnMatch IsToken, BufferLocation& start, SearchDirection dir) const -> bool
+auto ZepBuffer::SkipOne(const fnMatch& IsToken, BufferLocation& start, SearchDirection dir) const -> bool
 {
     if (!Valid(start))
     {
@@ -236,7 +236,7 @@ auto ZepBuffer::SkipOne(fnMatch IsToken, BufferLocation& start, SearchDirection 
     return moved;
 }
 
-auto ZepBuffer::SkipNot(fnMatch IsToken, BufferLocation& start, SearchDirection dir) const -> bool
+auto ZepBuffer::SkipNot(const fnMatch& IsToken, BufferLocation& start, SearchDirection dir) const -> bool
 {
     if (!Valid(start))
     {
@@ -1266,7 +1266,7 @@ void ZepBuffer::ClearRangeMarkers(uint32_t markerType)
     GetEditor().Broadcast(std::make_shared<BufferMessage>(this, BufferMessageType::MarkersChanged, 0, BufferLocation(m_gapBuffer.size() - 1)));
 }
 
-void ZepBuffer::ForEachMarker(uint32_t markerType, SearchDirection dir, BufferLocation begin, BufferLocation end, std::function<bool(const std::shared_ptr<RangeMarker>&)> fnCB) const
+void ZepBuffer::ForEachMarker(uint32_t markerType, SearchDirection dir, BufferLocation begin, BufferLocation end, const std::function<bool(const std::shared_ptr<RangeMarker>&)>& fnCB) const
 {
     auto itrStart = m_rangeMarkers.lower_bound(begin);
     if (itrStart == m_rangeMarkers.end())
@@ -1417,12 +1417,12 @@ auto ZepBuffer::GetMode() const -> ZepMode*
     return GetEditor().GetGlobalMode();
 }
 
-void ZepBuffer::SetMode(std::shared_ptr<ZepMode> spMode)
+void ZepBuffer::SetMode(const std::shared_ptr<ZepMode>& spMode)
 {
     m_spMode = spMode;
 }
 
-void ZepBuffer::AddLineWidget(int32_t line, std::shared_ptr<ILineWidget> spWidget)
+void ZepBuffer::AddLineWidget(int32_t line, const std::shared_ptr<ILineWidget>& spWidget)
 {
     // TODO(unknown): Add layout changed message
     int32_t start;

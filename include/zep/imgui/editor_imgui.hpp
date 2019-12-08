@@ -33,18 +33,18 @@ public:
         uint32_t mod = 0;
 
         static std::map<int, int> MapUSBKeys = {
-            { ZKEY_F1, ExtKeys::F1 },
-            { ZKEY_F2, ExtKeys::F2 },
-            { ZKEY_F3, ExtKeys::F3 },
-            { ZKEY_F4, ExtKeys::F4 },
-            { ZKEY_F5, ExtKeys::F5 },
-            { ZKEY_F6, ExtKeys::F6 },
-            { ZKEY_F7, ExtKeys::F7 },
-            { ZKEY_F8, ExtKeys::F8 },
-            { ZKEY_F9, ExtKeys::F9 },
-            { ZKEY_F10, ExtKeys::F10 },
-            { ZKEY_F11, ExtKeys::F11 },
-            { ZKEY_F12, ExtKeys::F12 }
+            { Keys::Key_F1, ExtKeys::F1 },
+            { Keys::Key_F2, ExtKeys::F2 },
+            { Keys::Key_F3, ExtKeys::F3 },
+            { Keys::Key_F4, ExtKeys::F4 },
+            { Keys::Key_F5, ExtKeys::F5 },
+            { Keys::Key_F6, ExtKeys::F6 },
+            { Keys::Key_F7, ExtKeys::F7 },
+            { Keys::Key_F8, ExtKeys::F8 },
+            { Keys::Key_F9, ExtKeys::F9 },
+            { Keys::Key_F10, ExtKeys::F10 },
+            { Keys::Key_F11, ExtKeys::F11 },
+            { Keys::Key_F12, ExtKeys::F12 }
         };
         if (io.MouseDelta.x != 0 || io.MouseDelta.y != 0)
         {
@@ -176,38 +176,6 @@ public:
         }
         if (io.KeyCtrl)
         {
-            // SDL Remaps to its own scancodes; and since we can't look them up in the standard IMGui list
-            // without modifying the ImGui base code, we have special handling here for CTRL.
-            // For the Win32 case, we use VK_A (ASCII) is handled below
-#if defined(_SDL_H) || defined(ZEP_USE_SDL)
-            if (ImGui::IsKeyPressed(ZKEY_1))
-            {
-                SetGlobalMode(ZepMode_Standard::StaticName());
-                handled = true;
-            }
-            else if (ImGui::IsKeyPressed(ZKEY_2))
-            {
-                SetGlobalMode(ZepMode_Vim::StaticName());
-                handled = true;
-            }
-            else
-            {
-                for (int ch = ZKEY_A; ch <= ZKEY_Z; ch++)
-                {
-                    if (ImGui::IsKeyPressed(ch))
-                    {
-                        buffer.GetMode()->AddKeyPress((ch - ZKEY_A) + 'a', mod);
-                        handled = true;
-                    }
-                }
-
-                if (ImGui::IsKeyPressed(ZKEY_SPACE))
-                {
-                    buffer.GetMode()->AddKeyPress(' ', mod);
-                    handled = true;
-                }
-            }
-#else
             if (ImGui::IsKeyPressed('1'))
             {
                 SetGlobalMode(ZepMode_Standard::StaticName());
@@ -229,13 +197,12 @@ public:
                     }
                 }
 
-                if (ImGui::IsKeyPressed(ZKEY_SPACE))
+                if (ImGui::IsKeyPressed(Keys::Key_Space))
                 {
                     buffer.GetMode()->AddKeyPress(' ', mod);
                     handled = true;
                 }
             }
-#endif
         }
 
         if (!handled)

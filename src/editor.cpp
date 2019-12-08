@@ -804,13 +804,13 @@ auto ZepEditor::GetRegisters() -> const tRegisters&
     return m_registers;
 }
 
-void ZepEditor::Notify(const std::shared_ptr<ZepMessage>& pMsg)
+void ZepEditor::Notify(const std::shared_ptr<ZepMessage>& message)
 {
-    if (pMsg->messageId == Msg::MouseDown)
+    if (message->messageId == Msg::MouseDown)
     {
         for (auto& windowRect : m_tabRects)
         {
-            if (windowRect.second.Contains(pMsg->pos))
+            if (windowRect.second.Contains(message->pos))
             {
                 SetCurrentTabWindow(windowRect.first);
             }
@@ -1046,9 +1046,9 @@ auto ZepEditor::GetMousePos() const -> NVec2f
     return m_mousePos;
 }
 
-void ZepEditor::SetPixelScale(float scale)
+void ZepEditor::SetPixelScale(float pt)
 {
-    m_pixelScale = scale;
+    m_pixelScale = pt;
 }
 
 auto ZepEditor::GetPixelScale() const -> float
