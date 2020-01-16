@@ -209,8 +209,8 @@ public:
     auto StandardCtrlMotion(BufferLocation cursor, SearchDirection searchDir) const -> BufferRange;
 
     auto Delete(const BufferLocation& startOffset, const BufferLocation& endOffset) -> bool;
-    auto Insert(const BufferLocation& startOffset, const std::string& str) -> bool;
-    auto Replace(const BufferLocation& startOffset, const BufferLocation& endOffset, const std::string& str) -> bool;
+    auto Insert(const BufferLocation& startOffset, const std::string_view& str) -> bool;
+    auto Replace(const BufferLocation& startOffset, const BufferLocation& endOffset, const std::string_view& str) -> bool;
 
     auto GetLineCount() const -> int32_t
     {

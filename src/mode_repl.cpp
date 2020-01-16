@@ -10,8 +10,8 @@
 namespace Zep
 {
 
-const std::string PromptString = ">> ";
-const std::string ContinuationString = ".. ";
+constexpr std::string_view PromptString = ">> ";
+constexpr std::string_view ContinuationString = ".. ";
 
 ZepMode_Repl::ZepMode_Repl(ZepEditor& editor, ZepWindow& launchWindow, ZepWindow& replWindow)
     : ZepMode(editor)
@@ -158,10 +158,8 @@ void ZepMode_Repl::AddKeyPress(uint32_t key, uint32_t modifiers)
     }
     else
     {
-        char c[2];
-        c[0] = (char)key;
-        c[1] = 0;
-        m_replWindow.GetBuffer().Insert(m_replWindow.GetBufferCursor(), std::string(c));
+        std::array<char, 2> c {static_cast<char>(key), 0};
+        m_replWindow.GetBuffer().Insert(m_replWindow.GetBufferCursor(), c.data());
     }
 
     // Ensure cursor is at buffer end

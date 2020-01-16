@@ -1024,7 +1024,7 @@ void ZepBuffer::UpdateForInsert(const BufferLocation& startOffset, const BufferL
     }
 }
 
-auto ZepBuffer::Insert(const BufferLocation& startOffset, const std::string& str) -> bool
+auto ZepBuffer::Insert(const BufferLocation& startOffset, const std::string_view& str) -> bool
 {
     if (startOffset > m_gapBuffer.size())
     {
@@ -1093,7 +1093,7 @@ auto ZepBuffer::Insert(const BufferLocation& startOffset, const std::string& str
     return true;
 }
 
-auto ZepBuffer::Replace(const BufferLocation& startOffset, const BufferLocation& endOffset, const std::string& str) -> bool
+auto ZepBuffer::Replace(const BufferLocation& startOffset, const BufferLocation& endOffset, const std::string_view& str) -> bool
 {
     if (startOffset > m_gapBuffer.size() || endOffset > m_gapBuffer.size())
     {

@@ -15,7 +15,8 @@ void ZepDisplay::InvalidateCharCache()
 void ZepDisplay::BuildCharCache()
 {
     const char chA = 'A';
-    m_defaultCharSize = GetTextSize((const utf8*)&chA, (const utf8*)&chA + 1);
+    const auto chSize = reinterpret_cast<const utf8*>(&chA);
+    m_defaultCharSize = GetTextSize(chSize, chSize + 1);
     for (int i = 0; i < 256; i++)
     {
         utf8 ch = (utf8)i;

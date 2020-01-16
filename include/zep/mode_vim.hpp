@@ -53,7 +53,7 @@ enum class CommandOperation
 
 struct CommandContext
 {
-    CommandContext(const std::string& commandIn, ZepMode_Vim& md, uint32_t lastK, uint32_t modifierK, EditorMode editorMode);
+    CommandContext(std::string commandIn, ZepMode_Vim& md, uint32_t lastK, uint32_t modifierK, EditorMode editorMode);
 
     // Parse the command into:
     // [count1] opA [count2] opB
@@ -101,7 +101,7 @@ public:
     explicit ZepMode_Vim(ZepEditor& editor);
     ~ZepMode_Vim() override;
 
-    void AddKeyPress(uint32_t key, uint32_t modifiers) override;
+    void AddKeyPress(uint32_t key, uint32_t modifierKeys) override;
     void Begin() override;
 
     static auto StaticName() -> const char*

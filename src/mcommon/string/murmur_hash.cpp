@@ -22,7 +22,7 @@ auto murmur_hash(const void* key, int len, uint32_t seed) -> uint32_t
 #ifdef PLATFORM_BIG_ENDIAN
         unsigned int k = (data[0]) + (data[1] << 8) + (data[2] << 16) + (data[3] << 24);
 #else
-        unsigned int k = *(unsigned int*)data;
+        unsigned int k = *data;
 #endif
 
         k *= m;
@@ -47,6 +47,7 @@ auto murmur_hash(const void* key, int len, uint32_t seed) -> uint32_t
     case 1:
         h ^= data[0];
         h *= m;
+    default:;
     };
 
     // Do a few final mixes of the hash to ensure the last few
@@ -107,7 +108,7 @@ auto murmur_hash_64(const void* key, uint32_t len, uint64_t seed) -> uint64_t
 
     uint64_t h = seed ^ (len * m);
 
-    const auto* data = (const uint64_t*)key;
+    const auto* data = reinterpret_cast<const uint64_t*>(key);
     const uint64_t* end = data + (len / 8);
 
     while (data != end)
@@ -140,7 +141,7 @@ auto murmur_hash_64(const void* key, uint32_t len, uint64_t seed) -> uint64_t
         h *= m;
     }
 
-    const auto* data2 = (const unsigned char*)data;
+    const auto* data2 = reinterpret_cast<const unsigned char*>(data);
 
     switch (len & 7)
     {

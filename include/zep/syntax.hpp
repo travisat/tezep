@@ -41,8 +41,8 @@ class ZepSyntax : public ZepComponent
 {
 public:
     ZepSyntax(ZepBuffer& buffer,
-        std::set<std::string> keywords = std::set<std::string>{},
-        std::set<std::string> identifiers = std::set<std::string>{},
+        std::set<std::string_view> keywords = std::set<std::string_view>{},
+        std::set<std::string_view> identifiers = std::set<std::string_view>{},
         uint32_t flags = 0);
     ~ZepSyntax() override;
 
@@ -73,8 +73,8 @@ protected:
     std::atomic<int32_t> m_processedChar = { 0 };
     std::vector<uint32_t> m_multiCommentStarts;
     std::vector<uint32_t> m_multiCommentEnds;
-    std::set<std::string> m_keywords;
-    std::set<std::string> m_identifiers;
+    std::set<std::string_view> m_keywords;
+    std::set<std::string_view> m_identifiers;
     std::atomic<bool> m_stop;
     std::vector<std::shared_ptr<ZepSyntaxAdorn>> m_adornments;
     uint32_t m_flags;

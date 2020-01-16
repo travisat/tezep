@@ -1,5 +1,6 @@
 #include <cctype>
 #include <sstream>
+#include <utility>
 
 #include "zep/buffer.hpp"
 #include "zep/mode_search.hpp"
@@ -67,9 +68,9 @@
 namespace Zep
 {
 
-CommandContext::CommandContext(const std::string& commandIn, ZepMode_Vim& md, uint32_t lastK, uint32_t modifierK, EditorMode editorMode)
+CommandContext::CommandContext(std::string commandIn, ZepMode_Vim& md, uint32_t lastK, uint32_t modifierK, EditorMode editorMode)
     : owner(md)
-    , commandText(commandIn)
+    , commandText(std::move(commandIn))
     , buffer(md.GetCurrentWindow()->GetBuffer())
     , bufferCursor(md.GetCurrentWindow()->GetBufferCursor())
     , tempReg("", false)

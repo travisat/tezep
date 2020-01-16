@@ -15,8 +15,8 @@ namespace Zep
 
 ZepSyntax::ZepSyntax(
     ZepBuffer& buffer,
-    std::set<std::string> keywords,
-    std::set<std::string> identifiers,
+    std::set<std::string_view> keywords,
+    std::set<std::string_view> identifiers,
     uint32_t flags)
     : ZepComponent(buffer.GetEditor())
     , m_buffer(buffer)
