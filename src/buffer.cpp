@@ -1052,7 +1052,7 @@ auto ZepBuffer::Insert(const BufferLocation& startOffset, const std::string_view
 
     // Make a list of lines to 'insert'
     std::vector<int32_t> lines;
-    std::string lineEndSymbols("\n");
+    std::string_view lineEndSymbols("\n");
     while (itr != itrEnd)
     {
         // Get to first point after "\n"
